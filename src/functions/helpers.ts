@@ -137,8 +137,6 @@ export const ensureSingleElementType = ({
     elementTypeObject["htmlElements"] = true
   }
 
-  console.log(elementTypeObject)
-
   if (!useMakComponents && !useHTMLElements && !useMakElements) {
     elementTypeObject["makElements"] = true
   }
