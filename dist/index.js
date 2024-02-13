@@ -70,7 +70,6 @@ const ensureSingleElementType = ({
     elementTypeObject["makComponents"] = false;
     elementTypeObject["htmlElements"] = true;
   }
-  console.log(elementTypeObject);
   if (!useMakComponents && !useHTMLElements && !useMakElements) {
     elementTypeObject["makElements"] = true;
   }
