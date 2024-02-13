@@ -9,7 +9,6 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
         useHTMLElements,
         useMakComponents,
     });
-    console.log({ makFormoutputtype: outputType });
     const formRef = useRef();
     const errorsRef = useRef({});
     const beforeValidationErrorsRef = useRef({});

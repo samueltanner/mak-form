@@ -123,9 +123,6 @@ const DynamicComponentStruct = props => {
     otherProps = __rest(props, ["form", "config", "children", "customComponent", "handleChange", "outputType", "type", "name", "label", "defaultValue", "className", "makClassName", "pattern", "value", "valueObjects", "placeholder", "options", "labelKey", "valueKey", "multiple", "onClick", "onBlur", "onFocus", "onSubmit", "onReset", "onChange", "formOnSubmit", "formOnReset", "validateOn", "revalidateOn", "formRef"]);
   const [localValue, setLocalValue] = React.useState(value);
   const componentRef = React.useRef(null);
-  console.log({
-    outputType
-  });
   const handleLocalChange = e => {
     if (multiple && e.target instanceof HTMLSelectElement) {
       const selectedOptions = e.target.selectedOptions;
@@ -268,22 +265,19 @@ const DynamicComponentStruct = props => {
       ref: componentRef
     }, otherProps));
   }
-  // if (outputType === "makElements") {
-  //   return (
-  //     <mak.input
-  //       type={type}
-  //       value={localValue as InputHTMLAttributes<HTMLInputElement>["value"]}
-  //       onChange={handleLocalChange}
-  //       onBlur={onBlur}
-  //       className={className}
-  //       makClassName={makClassName}
-  //       defaultValue={defaultValue as string}
-  //       placeholder={placeholder as string}
-  //       ref={componentRef as RefObject<HTMLInputElement>}
-  //       {...otherProps}
-  //     />
-  //   )
-  // }
+  if (outputType === "makElements") {
+    return /*#__PURE__*/React__default["default"].createElement(makUi.mak.input, _extends({
+      type: type,
+      value: localValue,
+      onChange: handleLocalChange,
+      onBlur: onBlur,
+      className: className,
+      makClassName: makClassName,
+      defaultValue: defaultValue,
+      placeholder: placeholder,
+      ref: componentRef
+    }, otherProps));
+  }
 };
 const DynamicComponent = /*#__PURE__*/React.memo(DynamicComponentStruct);
 
@@ -716,9 +710,6 @@ const useMakForm = ({
     useMakElements,
     useHTMLElements,
     useMakComponents
-  });
-  console.log({
-    makFormoutputtype: outputType
   });
   const formRef = React.useRef();
   const errorsRef = React.useRef({});

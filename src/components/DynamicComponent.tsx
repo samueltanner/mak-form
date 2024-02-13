@@ -71,7 +71,6 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
 
   const [localValue, setLocalValue] = useState(value)
   const componentRef = useRef<HTMLElement>(null)
-  console.log({ outputType })
 
   const handleLocalChange = (e: InputChangeEvent) => {
     if (multiple && e.target instanceof HTMLSelectElement) {
@@ -258,22 +257,22 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
     )
   }
 
-  // if (outputType === "makElements") {
-  //   return (
-  //     <mak.input
-  //       type={type}
-  //       value={localValue as InputHTMLAttributes<HTMLInputElement>["value"]}
-  //       onChange={handleLocalChange}
-  //       onBlur={onBlur}
-  //       className={className}
-  //       makClassName={makClassName}
-  //       defaultValue={defaultValue as string}
-  //       placeholder={placeholder as string}
-  //       ref={componentRef as RefObject<HTMLInputElement>}
-  //       {...otherProps}
-  //     />
-  //   )
-  // }
+  if (outputType === "makElements") {
+    return (
+      <mak.input
+        type={type}
+        value={localValue as InputHTMLAttributes<HTMLInputElement>["value"]}
+        onChange={handleLocalChange}
+        onBlur={onBlur}
+        className={className}
+        makClassName={makClassName}
+        defaultValue={defaultValue as string}
+        placeholder={placeholder as string}
+        ref={componentRef as RefObject<HTMLInputElement>}
+        {...otherProps}
+      />
+    )
+  }
 }
 
 const DynamicComponent = memo(DynamicComponentStruct)

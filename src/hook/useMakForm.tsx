@@ -62,8 +62,6 @@ export const useMakForm = ({
     useMakComponents,
   })
 
-  console.log({ makFormoutputtype: outputType })
-
   const formRef = useRef<MakForm>()
   const errorsRef = useRef<MakFormErrors>({})
   const beforeValidationErrorsRef = useRef<MakFormErrors>({})
