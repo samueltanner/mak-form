@@ -1,0 +1,44 @@
+{
+  "name": "@mak-stack/mak-form",
+  "version": "0.1.0",
+  "description": "MakForm: A form tool build on top of the MakUi package. MakForm allows developers to pass in a JSON object and the form hook will return ready to use React components with state, validation, and error handling built in.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c && tsc"
+  },
+  "keywords": [
+    "ui",
+    "tailwindcss",
+    "emotion-styled",
+    "design-system",
+    "theming",
+    "form",
+    "form-builder",
+    "form-validation",
+    "react",
+    "next",
+    "nextjs",
+    "mak-stack"
+  ],
+  "author": "Sam 'Makali'i' Tanner <samuel.m.s.tanner@gmail.com> (https://www.samuel-tanner.com/)",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.23.9",
+    "@babel/preset-react": "^7.23.3",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/chroma-js": "^2.4.4",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "rollup": "^2.79.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "@mak-stack/mak-ui": "^0.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.4.1"
+  }
+}
