@@ -1,6 +1,5 @@
 /// <reference types="react" />
-import { InputChangeEvent, MakForm, MakFormValidationOption } from "../types/index";
-import { FormAccessor } from "../hook/useMakForm";
+import { InputChangeEvent, MakForm, MakFormValidationOption, FormAccessor } from "../types/index";
 interface HandleChangeProps {
     form: FormAccessor["form"];
     event: InputChangeEvent;

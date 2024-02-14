@@ -1,5 +1,4 @@
 /// <reference types="react" />
-import { FormAccessor } from "../hook/useMakForm";
 export type GenericObject = Record<string, any>;
 export type NestedObject = {
     [key: string]: any;
@@ -191,3 +190,27 @@ export type MakFormChildrenProps = MakFormDynamicComponentProps & FormAccessor &
     revalidateOn: MakFormValidationOption;
     handleChange: (e?: any) => void;
 };
+export interface MakFormProps {
+    formConfig?: MakFormInput;
+    onSubmit?: (input?: any) => void;
+    onReset?: (input?: any) => void;
+    useMakElements?: boolean;
+    useHTMLElements?: boolean;
+    useMakComponents?: boolean;
+    validateFormOn?: MakFormValidationOption;
+    revalidateFormOn?: MakFormValidationOption;
+}
+export interface FormAccessor {
+    form: MakForm;
+    handleChange: ({ event, validateOn, }: {
+        event: InputChangeEvent;
+        validateOn: MakFormValidationOption;
+        revalidateOn?: MakFormValidationOption;
+    }) => void;
+    formRef: React.MutableRefObject<MakForm | undefined>;
+    outputType: MakFormComponentOutputType;
+    onSubmit?: (input?: any) => void;
+    onReset?: (input?: any) => void;
+    validateFormOn?: MakFormValidationOption;
+    revalidateFormOn?: MakFormValidationOption;
+}

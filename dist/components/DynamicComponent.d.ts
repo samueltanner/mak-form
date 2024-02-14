@@ -1,6 +1,5 @@
 import React from "react";
-import { FieldType, MakFormDynamicComponentProps, MakFormFieldConfig, MakFormValidationOption } from "../types/index";
-import { FormAccessor } from "../hook/useMakForm";
+import { FieldType, MakFormDynamicComponentProps, MakFormFieldConfig, MakFormValidationOption, FormAccessor } from "../types/index";
 type DynamicComponentProps = MakFormDynamicComponentProps & FormAccessor & {
     config: MakFormFieldConfig;
     name: string;

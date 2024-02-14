@@ -10,8 +10,8 @@ import {
   NumberFieldConfig,
   SelectFieldConfig,
   TextFieldConfig,
+  FormAccessor,
 } from "../types/index"
-import { FormAccessor } from "../hook/useMakForm"
 import { getValueObjectsArray } from "./helpers"
 import React from "react"
 

@@ -4,10 +4,9 @@ import {
   MakForm,
   MakFormErrors,
   MakFormFieldConfig,
-  MakFormValidationOption,
   NumberFieldConfig,
   TextFieldConfig,
-} from "../types/index"
+} from "../types/index";
 
 const validateField = ({
   form,

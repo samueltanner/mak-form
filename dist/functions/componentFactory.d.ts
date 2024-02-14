@@ -1,5 +1,4 @@
-import { MakForm, MakFormComponentOutputType, MakFormDynamicComponent } from "../types/index";
-import { FormAccessor } from "../hook/useMakForm";
+import { MakForm, MakFormComponentOutputType, MakFormDynamicComponent, FormAccessor } from "../types/index";
 export declare const getComponentName: (fieldName: string) => string;
 export declare const getInitialComponentNames: ({ formConfig, }: {
     formConfig: MakForm | undefined;

@@ -15,8 +15,8 @@ import {
   MakFormDynamicComponentProps,
   MakFormFieldConfig,
   MakFormValidationOption,
+  FormAccessor,
 } from "../types/index"
-import { FormAccessor } from "../hook/useMakForm"
 import { getValueObjectsArray } from "../functions/helpers"
 
 type DynamicComponentProps = MakFormDynamicComponentProps &

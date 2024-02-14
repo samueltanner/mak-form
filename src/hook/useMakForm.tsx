@@ -5,46 +5,20 @@ import {
 import constructForm from "../functions/constructForm"
 import { ensureSingleElementType } from "../functions/helpers"
 import React, { useEffect, useRef, useState } from "react"
-
 import {
+  FormAccessor,
   InputChangeEvent,
   MakForm,
   MakFormComponentOutputType,
   MakFormDynamicComponents,
   MakFormErrors,
   MakFormInput,
+  MakFormProps,
   MakFormValidationOption,
 } from "../types/index"
 import { validateField, validateForm } from "../functions/validate"
 
-interface MakFormProps {
-  formConfig?: MakFormInput
-  onSubmit?: (input?: any) => void
-  onReset?: (input?: any) => void
-  useMakElements?: boolean
-  useHTMLElements?: boolean
-  useMakComponents?: boolean
-  validateFormOn?: MakFormValidationOption
-  revalidateFormOn?: MakFormValidationOption
-}
 
-export interface FormAccessor {
-  form: MakForm
-  handleChange: ({
-    event,
-    validateOn,
-  }: {
-    event: InputChangeEvent
-    validateOn: MakFormValidationOption
-    revalidateOn?: MakFormValidationOption
-  }) => void
-  formRef: React.MutableRefObject<MakForm | undefined>
-  outputType: MakFormComponentOutputType
-  onSubmit?: (input?: any) => void
-  onReset?: (input?: any) => void
-  validateFormOn?: MakFormValidationOption
-  revalidateFormOn?: MakFormValidationOption
-}
 
 export const useMakForm = ({
   formConfig,

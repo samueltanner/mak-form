@@ -2,8 +2,8 @@ import {
   InputChangeEvent,
   MakForm,
   MakFormValidationOption,
+  FormAccessor,
 } from "../types/index"
-import { FormAccessor } from "../hook/useMakForm"
 
 import { validateField } from "./validate"
 
