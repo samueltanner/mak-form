@@ -1,6 +1,6 @@
 {
   "name": "@mak-stack/mak-form",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "MakForm: A form tool build on top of the MakUi package. MakForm allows developers to pass in a JSON object and the form hook will return ready to use React components with state, validation, and error handling built in.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
