@@ -84,7 +84,10 @@ const componentFactory = ({
 
   // "select" | "radio" | "multi-select" | "searchable-select"
   const options = (config as SelectFieldConfig)?.options
-  const valueObjects = getValueObjectsArray(value || defaultValue, options)
+  const valueObjects = getValueObjectsArray(
+    value || defaultValue,
+    options || []
+  )
   const labelKey = (config as SelectFieldConfig)?.labelKey || "label"
   const valueKey = (config as SelectFieldConfig)?.valueKey || "value"
   const multiple = (config as SelectFieldConfig)?.multiple

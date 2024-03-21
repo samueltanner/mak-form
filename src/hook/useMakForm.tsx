@@ -9,16 +9,14 @@ import {
   FormAccessor,
   InputChangeEvent,
   MakForm,
-  MakFormComponentOutputType,
   MakFormDynamicComponents,
+  MakFormElement,
   MakFormErrors,
-  MakFormInput,
+  MakFormFieldConfig,
   MakFormProps,
   MakFormValidationOption,
 } from "../types/index"
 import { validateField, validateForm } from "../functions/validate"
-
-
 
 export const useMakForm = ({
   formConfig,
@@ -36,11 +34,10 @@ export const useMakForm = ({
     useMakComponents,
   })
 
-  const formRef = useRef<MakForm>()
+  const formRef = useRef<MakForm>(formConfig || {})
+  const originalFormRef = useRef<MakForm>()
   const errorsRef = useRef<MakFormErrors>({})
-  const beforeValidationErrorsRef = useRef<MakFormErrors>({})
-  const [form, setForm] = useState<MakForm>(formConfig || {})
-  const [formErrors, setFormErrors] = useState<MakFormErrors>(
+  const beforeValidationErrorsRef = useRef<MakFormErrors>(
     Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
       if (!["button", "submit", "reset"].includes((value as any)?.type)) {
         ;(acc as MakFormErrors)[key] = undefined
@@ -48,6 +45,17 @@ export const useMakForm = ({
       return acc
     }, {})
   )
+
+  const [form, setForm] = useState<MakForm>({})
+  const [errors, setErrors] = useState<MakFormErrors>({})
+  // const [formErrors, setFormErrors] = useState<MakFormErrors>(
+  //   Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
+  //     if (!["button", "submit", "reset"].includes((value as any)?.type)) {
+  //       ;(acc as MakFormErrors)[key] = undefined
+  //     }
+  //     return acc
+  //   }, {})
+  // )
   const [dynamicComponents, setDynamicComponents] =
     useState<MakFormDynamicComponents>(getInitialComponentNames({ formConfig }))
   const [isDirty, setIsDirty] = useState(false)
@@ -58,7 +66,7 @@ export const useMakForm = ({
   }, [isDirty])
 
   const formAccessor: FormAccessor = {
-    form,
+    form: formRef.current as MakForm,
     handleChange,
     outputType,
     onSubmit: handleSubmit,
@@ -83,64 +91,57 @@ export const useMakForm = ({
     const value = target?.type === "checkbox" ? target.checked : target.value
     const fieldName = target.name
 
-    let validation: string | undefined = undefined
+    const prev = formRef.current as MakForm
+    const prevField = prev[fieldName]
+    const updatedValue = {
+      ...prevField,
+    } as MakFormElement | MakFormErrors
+    updatedValue["value"] = value
+    updatedValue["errors"] = undefined
 
-    if (validateOn === "change" || validateFormOn === "change") {
-      validation = validateField({
-        form,
-        fieldName,
-        value,
-      })?.[fieldName] as string | undefined
+    const updatedForm = {
+      ...prev,
+      [fieldName]: {
+        ...updatedValue,
+      },
+    } as MakForm
 
-      setFormErrors((prev) => {
-        const updatedErrors = {
-          ...prev,
-          [fieldName]: validation,
-        }
-        return updatedErrors as MakFormErrors
-      })
+    const validation = validateField({
+      form: updatedForm,
+      fieldName,
+      value,
+    })?.[fieldName] as string | undefined
+
+    updatedForm[fieldName]!.errors = validation
+
+    formRef.current = updatedForm as MakForm
+    setForm(updatedForm as MakForm)
+
+    const continuousValidationErrors = {
+      ...beforeValidationErrorsRef.current,
+      [fieldName]: validation,
     }
+
+    beforeValidationErrorsRef.current =
+      continuousValidationErrors as MakFormErrors
+
     if (
-      errorsRef.current?.[fieldName] &&
-      (revalidateFormOn === "change" || revalidateOn === "change")
+      validateOn === "change" ||
+      validateFormOn === "change" ||
+      revalidateFormOn === "change" ||
+      revalidateOn === "change"
     ) {
-      validation = validateField({
-        form,
-        fieldName,
-        value,
-      })?.[fieldName] as string | undefined
-
-      setFormErrors((prev) => {
-        const updatedErrors = {
-          ...prev,
-          [fieldName]: validation,
-        }
-        return updatedErrors as MakFormErrors
-      })
+      errorsRef.current = beforeValidationErrorsRef.current
+      setErrors(errorsRef.current)
     }
-
-    setForm((prev): MakForm => {
-      const updatedForm = {
-        ...prev,
-        [fieldName]: {
-          ...prev[fieldName],
-          ...target,
-          errors: validation,
-        },
-      }
-      return updatedForm as MakForm
-    })
-
-    beforeValidationErrorsRef.current = validateForm({
-      form: formRef.current || {},
-    })
   }
 
   function handleSubmit() {
     const validation = validateForm({ form: formRef.current || {} })
-
-    setFormErrors(validation)
-    if (formErrors && Object.values(validation).some((error) => error)) {
+    console.log("validation", validation)
+    if (Object.values(validation).some((error) => error)) {
+      errorsRef.current = validation
+      setErrors(errorsRef.current)
       return
     }
     if (onSubmit) {
@@ -160,8 +161,22 @@ export const useMakForm = ({
   const constructFormAndComponents = () => {
     if (!formConfig) return
     const constructedForm = constructForm(formAccessor)
-    setForm(constructedForm)
-    setDynamicComponents(constructDynamicComponents(formAccessor))
+
+    if (originalFormRef.current) {
+      const dynamicComponents = constructDynamicComponents({
+        ...formAccessor,
+        form: originalFormRef.current,
+      } as FormAccessor)
+      setDynamicComponents(dynamicComponents)
+    } else {
+      formRef.current = constructedForm
+
+      const errors = validateForm({ form: constructedForm })
+      beforeValidationErrorsRef.current = errors
+      originalFormRef.current = constructedForm as MakForm
+      const dynamicComponents = constructDynamicComponents(formAccessor)
+      setDynamicComponents(dynamicComponents)
+    }
     setIsDirty(false)
   }
 
@@ -184,18 +199,11 @@ export const useMakForm = ({
     constructFormAndComponents()
   }, [formConfig])
 
-  useEffect(() => {
-    formRef.current = form
-  }, [form])
-
-  useEffect(() => {
-    errorsRef.current = formErrors
-  }, [formErrors])
 
   return {
-    form,
+    form: form,
     components: dynamicComponents,
-    errors: formErrors,
+    errors: errors,
     formState: {
       errors: beforeValidationErrorsRef.current,
       values: getFormValues(),

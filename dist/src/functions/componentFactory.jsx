@@ -41,7 +41,7 @@ const componentFactory = ({ formAccessor, name, }) => {
     const maxLength = config === null || config === void 0 ? void 0 : config.maxLength;
     // "select" | "radio" | "multi-select" | "searchable-select"
     const options = config === null || config === void 0 ? void 0 : config.options;
-    const valueObjects = getValueObjectsArray(value || defaultValue, options);
+    const valueObjects = getValueObjectsArray(value || defaultValue, options || []);
     const labelKey = (config === null || config === void 0 ? void 0 : config.labelKey) || "label";
     const valueKey = (config === null || config === void 0 ? void 0 : config.valueKey) || "value";
     const multiple = config === null || config === void 0 ? void 0 : config.multiple;

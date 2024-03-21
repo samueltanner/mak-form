@@ -332,7 +332,7 @@ const componentFactory = ({
   const maxLength = config === null || config === void 0 ? void 0 : config.maxLength;
   // "select" | "radio" | "multi-select" | "searchable-select"
   const options = config === null || config === void 0 ? void 0 : config.options;
-  const valueObjects = getValueObjectsArray(value || defaultValue, options);
+  const valueObjects = getValueObjectsArray(value || defaultValue, options || []);
   const labelKey = (config === null || config === void 0 ? void 0 : config.labelKey) || "label";
   const valueKey = (config === null || config === void 0 ? void 0 : config.valueKey) || "value";
   const multiple = config === null || config === void 0 ? void 0 : config.multiple;
@@ -710,16 +710,25 @@ const useMakForm = ({
     useHTMLElements,
     useMakComponents
   });
-  const formRef = React.useRef();
+  const formRef = React.useRef(formConfig || {});
+  const originalFormRef = React.useRef();
   const errorsRef = React.useRef({});
-  const beforeValidationErrorsRef = React.useRef({});
-  const [form, setForm] = React.useState(formConfig || {});
-  const [formErrors, setFormErrors] = React.useState(Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
+  const beforeValidationErrorsRef = React.useRef(Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
     if (!["button", "submit", "reset"].includes(value === null || value === void 0 ? void 0 : value.type)) {
       acc[key] = undefined;
     }
     return acc;
   }, {}));
+  const [form, setForm] = React.useState({});
+  const [errors, setErrors] = React.useState({});
+  // const [formErrors, setFormErrors] = useState<MakFormErrors>(
+  //   Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
+  //     if (!["button", "submit", "reset"].includes((value as any)?.type)) {
+  //       ;(acc as MakFormErrors)[key] = undefined
+  //     }
+  //     return acc
+  //   }, {})
+  // )
   const [dynamicComponents, setDynamicComponents] = React.useState(getInitialComponentNames({
     formConfig
   }));
@@ -729,7 +738,7 @@ const useMakForm = ({
     setIsClean(!isDirty);
   }, [isDirty]);
   const formAccessor = {
-    form,
+    form: formRef.current,
     handleChange,
     outputType,
     onSubmit: handleSubmit,
@@ -743,56 +752,44 @@ const useMakForm = ({
     validateOn,
     revalidateOn
   }) {
-    var _a, _b, _c;
+    var _a;
     setIsDirty(true);
     const target = event.target;
     const value = (target === null || target === void 0 ? void 0 : target.type) === "checkbox" ? target.checked : target.value;
     const fieldName = target.name;
-    let validation = undefined;
-    if (validateOn === "change" || validateFormOn === "change") {
-      validation = (_a = validateField({
-        form,
-        fieldName,
-        value
-      })) === null || _a === void 0 ? void 0 : _a[fieldName];
-      setFormErrors(prev => {
-        const updatedErrors = Object.assign(Object.assign({}, prev), {
-          [fieldName]: validation
-        });
-        return updatedErrors;
-      });
-    }
-    if (((_b = errorsRef.current) === null || _b === void 0 ? void 0 : _b[fieldName]) && (revalidateFormOn === "change" || revalidateOn === "change")) {
-      validation = (_c = validateField({
-        form,
-        fieldName,
-        value
-      })) === null || _c === void 0 ? void 0 : _c[fieldName];
-      setFormErrors(prev => {
-        const updatedErrors = Object.assign(Object.assign({}, prev), {
-          [fieldName]: validation
-        });
-        return updatedErrors;
-      });
-    }
-    setForm(prev => {
-      const updatedForm = Object.assign(Object.assign({}, prev), {
-        [fieldName]: Object.assign(Object.assign(Object.assign({}, prev[fieldName]), target), {
-          errors: validation
-        })
-      });
-      return updatedForm;
+    const prev = formRef.current;
+    const prevField = prev[fieldName];
+    const updatedValue = Object.assign({}, prevField);
+    updatedValue["value"] = value;
+    updatedValue["errors"] = undefined;
+    const updatedForm = Object.assign(Object.assign({}, prev), {
+      [fieldName]: Object.assign({}, updatedValue)
     });
-    beforeValidationErrorsRef.current = validateForm({
-      form: formRef.current || {}
+    const validation = (_a = validateField({
+      form: updatedForm,
+      fieldName,
+      value
+    })) === null || _a === void 0 ? void 0 : _a[fieldName];
+    updatedForm[fieldName].errors = validation;
+    formRef.current = updatedForm;
+    setForm(updatedForm);
+    const continuousValidationErrors = Object.assign(Object.assign({}, beforeValidationErrorsRef.current), {
+      [fieldName]: validation
     });
+    beforeValidationErrorsRef.current = continuousValidationErrors;
+    if (validateOn === "change" || validateFormOn === "change" || revalidateFormOn === "change" || revalidateOn === "change") {
+      errorsRef.current = beforeValidationErrorsRef.current;
+      setErrors(errorsRef.current);
+    }
   }
   function handleSubmit() {
     const validation = validateForm({
       form: formRef.current || {}
     });
-    setFormErrors(validation);
-    if (formErrors && Object.values(validation).some(error => error)) {
+    console.log("validation", validation);
+    if (Object.values(validation).some(error => error)) {
+      errorsRef.current = validation;
+      setErrors(errorsRef.current);
       return;
     }
     if (onSubmit) {
@@ -810,8 +807,21 @@ const useMakForm = ({
   const constructFormAndComponents = () => {
     if (!formConfig) return;
     const constructedForm = constructForm(formAccessor);
-    setForm(constructedForm);
-    setDynamicComponents(constructDynamicComponents(formAccessor));
+    if (originalFormRef.current) {
+      const dynamicComponents = constructDynamicComponents(Object.assign(Object.assign({}, formAccessor), {
+        form: originalFormRef.current
+      }));
+      setDynamicComponents(dynamicComponents);
+    } else {
+      formRef.current = constructedForm;
+      const errors = validateForm({
+        form: constructedForm
+      });
+      beforeValidationErrorsRef.current = errors;
+      originalFormRef.current = constructedForm;
+      const dynamicComponents = constructDynamicComponents(formAccessor);
+      setDynamicComponents(dynamicComponents);
+    }
     setIsDirty(false);
   };
   const getFormValues = () => {
@@ -827,16 +837,10 @@ const useMakForm = ({
   React.useEffect(() => {
     constructFormAndComponents();
   }, [formConfig]);
-  React.useEffect(() => {
-    formRef.current = form;
-  }, [form]);
-  React.useEffect(() => {
-    errorsRef.current = formErrors;
-  }, [formErrors]);
   return {
-    form,
+    form: form,
     components: dynamicComponents,
-    errors: formErrors,
+    errors: errors,
     formState: {
       errors: beforeValidationErrorsRef.current,
       values: getFormValues(),
