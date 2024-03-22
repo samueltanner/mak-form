@@ -74,7 +74,6 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
   const componentRef = useRef<HTMLElement>(null)
 
   const handleLocalChange = (e: InputChangeEvent) => {
-    console.log("handleLocalChange")
     if (multiple && e.target instanceof HTMLSelectElement) {
       const selectedOptions = e.target.selectedOptions
 
@@ -98,9 +97,8 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
   }
 
   const handleCustomComponentChange = (e: any) => {
-    console.log("onChange", e)
     const value = e?.target?.value || e?.value || e
-    console.log("value", value)
+
     const event = {
       target: {
         name,

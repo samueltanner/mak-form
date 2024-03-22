@@ -86,7 +86,6 @@ export const useMakForm = ({
     validateOn: MakFormValidationOption
     revalidateOn?: MakFormValidationOption
   }) {
-    console.log("useMakForm handleChange")
     setIsDirty(true)
     const target = event.target as HTMLInputElement
 

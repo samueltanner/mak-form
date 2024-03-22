@@ -17,7 +17,6 @@ const DynamicComponentStruct = (props) => {
     const [localValue, setLocalValue] = useState(value);
     const componentRef = useRef(null);
     const handleLocalChange = (e) => {
-        console.log("handleLocalChange");
         if (multiple && e.target instanceof HTMLSelectElement) {
             const selectedOptions = e.target.selectedOptions;
             const selectedValues = Array.from(selectedOptions).map((option) => option.value);
@@ -38,9 +37,7 @@ const DynamicComponentStruct = (props) => {
     };
     const handleCustomComponentChange = (e) => {
         var _a;
-        console.log("onChange", e);
         const value = ((_a = e === null || e === void 0 ? void 0 : e.target) === null || _a === void 0 ? void 0 : _a.value) || (e === null || e === void 0 ? void 0 : e.value) || e;
-        console.log("value", value);
         const event = {
             target: {
                 name,

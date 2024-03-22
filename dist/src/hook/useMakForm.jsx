@@ -47,7 +47,6 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
     };
     function handleChange({ event, validateOn, revalidateOn, }) {
         var _a;
-        console.log("useMakForm handleChange");
         setIsDirty(true);
         const target = event.target;
         const value = (target === null || target === void 0 ? void 0 : target.type) === "checkbox" ? target.checked : target.value;
