@@ -113,7 +113,7 @@ const componentFactory = ({
   const validateOn = config?.validateOn || validateFormOn || "submit"
   const revalidateOn = config?.revalidateOn || revalidateFormOn || "change"
   // "boolean"
-  const checked = (config as BooleanFieldConfig)?.checked
+  const checked = (config as BooleanFieldConfig)?.checked || defaultValue === true 
 
   // "number" | "range" | "bounded-range"
   const min = (config as NumberFieldConfig)?.min
