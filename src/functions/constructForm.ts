@@ -59,6 +59,7 @@ const constructForm = (formAccessor: FormAccessor): MakForm => {
 
     // "boolean"
     const checked = (config as BooleanFieldConfig)?.checked
+    const defaultChecked = (config as BooleanFieldConfig)?.defaultChecked
 
     // "number" | "range" | "bounded-range"
     const min = (config as NumberFieldConfig)?.min
@@ -118,6 +119,7 @@ const constructForm = (formAccessor: FormAccessor): MakForm => {
       clearable,
       dismissOnClick,
       checked,
+      defaultChecked,
       min,
       max,
       step,

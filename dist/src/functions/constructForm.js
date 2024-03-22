@@ -42,6 +42,7 @@ const constructForm = (formAccessor) => {
         const validateOn = config === null || config === void 0 ? void 0 : config.validateOn;
         // "boolean"
         const checked = config === null || config === void 0 ? void 0 : config.checked;
+        const defaultChecked = config === null || config === void 0 ? void 0 : config.defaultChecked;
         // "number" | "range" | "bounded-range"
         const min = config === null || config === void 0 ? void 0 : config.min;
         const max = config === null || config === void 0 ? void 0 : config.max;
@@ -95,6 +96,7 @@ const constructForm = (formAccessor) => {
             clearable,
             dismissOnClick,
             checked,
+            defaultChecked,
             min,
             max,
             step,

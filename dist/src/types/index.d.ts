@@ -79,6 +79,7 @@ export interface SelectFieldConfig extends BaseFieldConfig {
 export interface BooleanFieldConfig extends BaseFieldConfig {
     type: "boolean" | "checkbox" | "toggle";
     checked?: boolean;
+    defaultChecked?: boolean;
 }
 export interface ButtonFieldConfig extends BaseFieldConfig {
     type: "button" | "submit" | "reset";

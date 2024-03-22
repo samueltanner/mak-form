@@ -113,7 +113,9 @@ const componentFactory = ({
   const validateOn = config?.validateOn || validateFormOn || "submit"
   const revalidateOn = config?.revalidateOn || revalidateFormOn || "change"
   // "boolean"
-  const checked = (config as BooleanFieldConfig)?.checked || defaultValue === true 
+  const checked = (config as BooleanFieldConfig)?.checked
+  const defaultChecked =
+    (config as BooleanFieldConfig)?.defaultChecked || defaultValue
 
   // "number" | "range" | "bounded-range"
   const min = (config as NumberFieldConfig)?.min
@@ -181,6 +183,7 @@ const componentFactory = ({
     clearable,
     dismissOnClick,
     checked,
+    defaultChecked,
     min,
     max,
     step,
