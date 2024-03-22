@@ -1,5 +1,6 @@
-import {
+import componentFactory, {
   constructDynamicComponents,
+  getComponentName,
   getInitialComponentNames,
 } from "../functions/componentFactory"
 import constructForm from "../functions/constructForm"
@@ -85,6 +86,7 @@ export const useMakForm = ({
     validateOn: MakFormValidationOption
     revalidateOn?: MakFormValidationOption
   }) {
+    console.log("useMakForm handleChange")
     setIsDirty(true)
     const target = event.target as HTMLInputElement
 
@@ -136,9 +138,38 @@ export const useMakForm = ({
     }
   }
 
+  const handleChangePublic = (name: string, value: any) => {
+    const elementType = formRef.current[name]?.type
+    const event = {
+      target: { name: name, value, type: elementType },
+    } as InputChangeEvent
+
+    handleChange({
+      event,
+      validateOn: "change",
+      revalidateOn: "change",
+    })
+    const componentName = getComponentName(
+      name,
+      formConfig?.[name]?.componentName
+    )
+    const proxyAccessor = {
+      ...formAccessor,
+      form: formRef.current,
+    }
+    const dynamicComponent = componentFactory({
+      formAccessor: proxyAccessor,
+      name,
+    })
+    const updatedDynamicComponents = {
+      ...dynamicComponents,
+      [componentName]: dynamicComponent,
+    }
+    setDynamicComponents(updatedDynamicComponents)
+  }
+
   function handleSubmit() {
     const validation = validateForm({ form: formRef.current || {} })
-    console.log("validation", validation)
     if (Object.values(validation).some((error) => error)) {
       errorsRef.current = validation
       setErrors(errorsRef.current)
@@ -154,6 +185,8 @@ export const useMakForm = ({
     if (onReset) {
       onReset()
     } else {
+      setForm(originalFormRef.current as MakForm)
+      formRef.current = originalFormRef.current as MakForm
       constructFormAndComponents()
     }
   }
@@ -168,12 +201,14 @@ export const useMakForm = ({
         form: originalFormRef.current,
       } as FormAccessor)
       setDynamicComponents(dynamicComponents)
+      setForm(constructedForm)
     } else {
       formRef.current = constructedForm
 
       const errors = validateForm({ form: constructedForm })
       beforeValidationErrorsRef.current = errors
       originalFormRef.current = constructedForm as MakForm
+      setForm(originalFormRef.current)
       const dynamicComponents = constructDynamicComponents(formAccessor)
       setDynamicComponents(dynamicComponents)
     }
@@ -187,6 +222,9 @@ export const useMakForm = ({
         if (value?.type !== "submit" && value?.type !== "reset") {
           ;(acc as any)[key] = value?.value
         }
+        if (formConfig?.[key]?.type === "number") {
+          ;(acc as any)[key] = Number(value?.value) || 0
+        }
         return acc
       },
       {}
@@ -199,7 +237,6 @@ export const useMakForm = ({
     constructFormAndComponents()
   }, [formConfig])
 
-
   return {
     form: form,
     components: dynamicComponents,
@@ -210,6 +247,7 @@ export const useMakForm = ({
       dirty: isDirty,
       clean: isClean,
     },
+    handleChange: handleChangePublic,
     reset: handleReset,
     submit: handleSubmit,
   } as {
@@ -222,6 +260,7 @@ export const useMakForm = ({
       clean: boolean
     }
     errors: MakFormErrors
+    handleChange: (target: string, value: any) => void
     reset: () => void
     submit: () => void
   }

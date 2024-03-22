@@ -1,4 +1,4 @@
-import { constructDynamicComponents, getInitialComponentNames, } from "../functions/componentFactory";
+import componentFactory, { constructDynamicComponents, getComponentName, getInitialComponentNames, } from "../functions/componentFactory";
 import constructForm from "../functions/constructForm";
 import { ensureSingleElementType } from "../functions/helpers";
 import { useEffect, useRef, useState } from "react";
@@ -47,6 +47,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
     };
     function handleChange({ event, validateOn, revalidateOn, }) {
         var _a;
+        console.log("useMakForm handleChange");
         setIsDirty(true);
         const target = event.target;
         const value = (target === null || target === void 0 ? void 0 : target.type) === "checkbox" ? target.checked : target.value;
@@ -76,9 +77,28 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             setErrors(errorsRef.current);
         }
     }
+    const handleChangePublic = (name, value) => {
+        var _a, _b;
+        const elementType = (_a = formRef.current[name]) === null || _a === void 0 ? void 0 : _a.type;
+        const event = {
+            target: { name: name, value, type: elementType },
+        };
+        handleChange({
+            event,
+            validateOn: "change",
+            revalidateOn: "change",
+        });
+        const componentName = getComponentName(name, (_b = formConfig === null || formConfig === void 0 ? void 0 : formConfig[name]) === null || _b === void 0 ? void 0 : _b.componentName);
+        const proxyAccessor = Object.assign(Object.assign({}, formAccessor), { form: formRef.current });
+        const dynamicComponent = componentFactory({
+            formAccessor: proxyAccessor,
+            name,
+        });
+        const updatedDynamicComponents = Object.assign(Object.assign({}, dynamicComponents), { [componentName]: dynamicComponent });
+        setDynamicComponents(updatedDynamicComponents);
+    };
     function handleSubmit() {
         const validation = validateForm({ form: formRef.current || {} });
-        console.log("validation", validation);
         if (Object.values(validation).some((error) => error)) {
             errorsRef.current = validation;
             setErrors(errorsRef.current);
@@ -94,6 +114,8 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             onReset();
         }
         else {
+            setForm(originalFormRef.current);
+            formRef.current = originalFormRef.current;
             constructFormAndComponents();
         }
     }
@@ -104,12 +126,14 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
         if (originalFormRef.current) {
             const dynamicComponents = constructDynamicComponents(Object.assign(Object.assign({}, formAccessor), { form: originalFormRef.current }));
             setDynamicComponents(dynamicComponents);
+            setForm(constructedForm);
         }
         else {
             formRef.current = constructedForm;
             const errors = validateForm({ form: constructedForm });
             beforeValidationErrorsRef.current = errors;
             originalFormRef.current = constructedForm;
+            setForm(originalFormRef.current);
             const dynamicComponents = constructDynamicComponents(formAccessor);
             setDynamicComponents(dynamicComponents);
         }
@@ -119,9 +143,14 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
         if (!formRef.current)
             return;
         const formValues = Object.entries(formRef.current).reduce((acc, [key, value]) => {
+            var _a;
             if ((value === null || value === void 0 ? void 0 : value.type) !== "submit" && (value === null || value === void 0 ? void 0 : value.type) !== "reset") {
                 ;
                 acc[key] = value === null || value === void 0 ? void 0 : value.value;
+            }
+            if (((_a = formConfig === null || formConfig === void 0 ? void 0 : formConfig[key]) === null || _a === void 0 ? void 0 : _a.type) === "number") {
+                ;
+                acc[key] = Number(value === null || value === void 0 ? void 0 : value.value) || 0;
             }
             return acc;
         }, {});
@@ -140,6 +169,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             dirty: isDirty,
             clean: isClean,
         },
+        handleChange: handleChangePublic,
         reset: handleReset,
         submit: handleSubmit,
     };

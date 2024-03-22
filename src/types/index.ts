@@ -103,7 +103,8 @@ export interface BaseFieldConfig {
   validateOn?: MakFormValidationOption
   revalidateOn?: MakFormValidationOption
   children?: React.ReactNode
-  customComponent?: React.ReactNode
+  customComponent?: React.ReactNode | null
+  componentName?: string
 }
 export interface ColorFieldConfig extends BaseFieldConfig {
   type: "color"
@@ -212,7 +213,7 @@ export type MakFormDynamicComponentProps = {
   children?:
     | React.ReactNode
     | ((props: MakFormChildrenProps) => React.ReactNode)
-  customComponent?: React.ElementType<MakFormChildrenProps>
+  customComponent?: React.ElementType<MakFormChildrenProps> | React.ReactNode
 
   required?: boolean
   defaultValue?: ValueOptions

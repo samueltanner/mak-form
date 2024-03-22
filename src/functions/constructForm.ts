@@ -20,6 +20,7 @@ const constructForm = (formAccessor: FormAccessor): MakForm => {
 
     const children = config?.children
     const customComponent = config?.customComponent
+    const componentName = config?.componentName
 
     const type = form[name]?.type || "text"
     const label = config?.label
@@ -89,6 +90,7 @@ const constructForm = (formAccessor: FormAccessor): MakForm => {
       config,
       children,
       customComponent,
+      componentName,
 
       type,
       label,

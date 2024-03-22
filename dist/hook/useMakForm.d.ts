@@ -9,6 +9,7 @@ export declare const useMakForm: ({ formConfig, useMakElements, useHTMLElements,
         clean: boolean;
     };
     errors: MakFormErrors;
+    handleChange: (target: string, value: any) => void;
     reset: () => void;
     submit: () => void;
 };

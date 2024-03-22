@@ -1,7 +1,10 @@
 import DynamicComponent from "../components/DynamicComponent";
 import { getValueObjectsArray } from "./helpers";
 import React from "react";
-export const getComponentName = (fieldName) => {
+export const getComponentName = (fieldName, componentName) => {
+    if (componentName) {
+        return componentName;
+    }
     const words = fieldName.split(/[\s-_]+/);
     return words
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -10,7 +13,9 @@ export const getComponentName = (fieldName) => {
 export const getInitialComponentNames = ({ formConfig, }) => {
     const dummyComponents = {};
     Object.keys(formConfig || {}).forEach((fieldName) => {
-        const name = getComponentName(fieldName);
+        var _a;
+        const customName = (_a = formConfig === null || formConfig === void 0 ? void 0 : formConfig[fieldName]) === null || _a === void 0 ? void 0 : _a.componentName;
+        const name = getComponentName(fieldName, customName);
         dummyComponents[name] = () => <div />;
     });
     if (!(formConfig === null || formConfig === void 0 ? void 0 : formConfig.Submit)) {
@@ -22,6 +27,7 @@ const componentFactory = ({ formAccessor, name, }) => {
     var _a;
     const { form, formRef, validateFormOn, revalidateFormOn, onSubmit: formOnSubmit, onReset: formOnReset, outputType, handleChange, } = formAccessor;
     const config = form[name];
+    const customComponent = config === null || config === void 0 ? void 0 : config.customComponent;
     const type = ((_a = form[name]) === null || _a === void 0 ? void 0 : _a.type) || "text";
     const label = config === null || config === void 0 ? void 0 : config.label;
     const required = config === null || config === void 0 ? void 0 : config.required;
@@ -90,6 +96,7 @@ const componentFactory = ({ formAccessor, name, }) => {
     const hookProps = {
         form,
         handleChange,
+        customComponent,
         formRef,
         validateOn,
         revalidateOn,
@@ -151,14 +158,16 @@ const componentFactory = ({ formAccessor, name, }) => {
     const ComponentWrapper = (props) => {
         return (<DynamicComponent outputType={outputType} {...hookProps} {...props}/>);
     };
-    ComponentWrapper.displayName = `${getComponentName(name)}`;
+    const componentName = getComponentName(name, config === null || config === void 0 ? void 0 : config.componentName);
+    ComponentWrapper.displayName = componentName;
     return ComponentWrapper;
 };
 export default componentFactory;
 const constructDynamicComponents = (formAccessor) => {
     const { form, outputType } = formAccessor;
     return Object.keys(form || {}).reduce((acc, name) => {
-        const componentName = getComponentName(name);
+        var _a;
+        const componentName = getComponentName(name, (_a = form[name]) === null || _a === void 0 ? void 0 : _a.componentName);
         const component = componentFactory({
             name,
             formAccessor,

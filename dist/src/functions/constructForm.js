@@ -7,6 +7,7 @@ const constructForm = (formAccessor) => {
         const config = form[name];
         const children = config === null || config === void 0 ? void 0 : config.children;
         const customComponent = config === null || config === void 0 ? void 0 : config.customComponent;
+        const componentName = config === null || config === void 0 ? void 0 : config.componentName;
         const type = ((_a = form[name]) === null || _a === void 0 ? void 0 : _a.type) || "text";
         const label = config === null || config === void 0 ? void 0 : config.label;
         const required = config === null || config === void 0 ? void 0 : config.required;
@@ -68,6 +69,7 @@ const constructForm = (formAccessor) => {
             config,
             children,
             customComponent,
+            componentName,
             type,
             label,
             required,

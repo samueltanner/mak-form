@@ -123,6 +123,7 @@ const DynamicComponentStruct = props => {
   const [localValue, setLocalValue] = React.useState(value);
   const componentRef = React.useRef(null);
   const handleLocalChange = e => {
+    console.log("handleLocalChange");
     if (multiple && e.target instanceof HTMLSelectElement) {
       const selectedOptions = e.target.selectedOptions;
       const selectedValues = Array.from(selectedOptions).map(option => option.value);
@@ -156,8 +157,22 @@ const DynamicComponentStruct = props => {
     }
     onChange && onChange(e);
   };
+  const handleCustomComponentChange = e => {
+    var _a;
+    console.log("onChange", e);
+    const value = ((_a = e === null || e === void 0 ? void 0 : e.target) === null || _a === void 0 ? void 0 : _a.value) || (e === null || e === void 0 ? void 0 : e.value) || e;
+    console.log("value", value);
+    const event = {
+      target: {
+        name,
+        value,
+        type
+      }
+    };
+    handleLocalChange(event);
+  };
   const resolvedChildrenProps = Object.assign(Object.assign({}, props), {
-    handleChange: handleLocalChange,
+    handleChange: handleCustomComponentChange,
     value: localValue,
     valueObjects: getValueObjectsArray(localValue, options || [])
   });
@@ -165,6 +180,8 @@ const DynamicComponentStruct = props => {
     if (typeof customComponent === "function") {
       const CustomComponent = customComponent;
       return /*#__PURE__*/React__default["default"].createElement(CustomComponent, resolvedChildrenProps);
+    } else {
+      return customComponent;
     }
   }
   if (children && typeof children === "function") {
@@ -280,7 +297,10 @@ const DynamicComponentStruct = props => {
 };
 const DynamicComponent = /*#__PURE__*/React.memo(DynamicComponentStruct);
 
-const getComponentName = fieldName => {
+const getComponentName = (fieldName, componentName) => {
+  if (componentName) {
+    return componentName;
+  }
   const words = fieldName.split(/[\s-_]+/);
   return words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join("");
 };
@@ -289,7 +309,9 @@ const getInitialComponentNames = ({
 }) => {
   const dummyComponents = {};
   Object.keys(formConfig || {}).forEach(fieldName => {
-    const name = getComponentName(fieldName);
+    var _a;
+    const customName = (_a = formConfig === null || formConfig === void 0 ? void 0 : formConfig[fieldName]) === null || _a === void 0 ? void 0 : _a.componentName;
+    const name = getComponentName(fieldName, customName);
     dummyComponents[name] = () => /*#__PURE__*/React__default["default"].createElement("div", null);
   });
   if (!(formConfig === null || formConfig === void 0 ? void 0 : formConfig.Submit)) {
@@ -313,6 +335,7 @@ const componentFactory = ({
     handleChange
   } = formAccessor;
   const config = form[name];
+  const customComponent = config === null || config === void 0 ? void 0 : config.customComponent;
   const type = ((_a = form[name]) === null || _a === void 0 ? void 0 : _a.type) || "text";
   const label = config === null || config === void 0 ? void 0 : config.label;
   const required = config === null || config === void 0 ? void 0 : config.required;
@@ -380,6 +403,7 @@ const componentFactory = ({
   const hookProps = {
     form,
     handleChange,
+    customComponent,
     formRef,
     validateOn,
     revalidateOn,
@@ -443,7 +467,8 @@ const componentFactory = ({
       outputType: outputType
     }, hookProps, props));
   };
-  ComponentWrapper.displayName = `${getComponentName(name)}`;
+  const componentName = getComponentName(name, config === null || config === void 0 ? void 0 : config.componentName);
+  ComponentWrapper.displayName = componentName;
   return ComponentWrapper;
 };
 const constructDynamicComponents = formAccessor => {
@@ -452,7 +477,8 @@ const constructDynamicComponents = formAccessor => {
     outputType
   } = formAccessor;
   return Object.keys(form || {}).reduce((acc, name) => {
-    const componentName = getComponentName(name);
+    var _a;
+    const componentName = getComponentName(name, (_a = form[name]) === null || _a === void 0 ? void 0 : _a.componentName);
     const component = componentFactory({
       name,
       formAccessor,
@@ -475,6 +501,7 @@ const constructForm = formAccessor => {
     const config = form[name];
     const children = config === null || config === void 0 ? void 0 : config.children;
     const customComponent = config === null || config === void 0 ? void 0 : config.customComponent;
+    const componentName = config === null || config === void 0 ? void 0 : config.componentName;
     const type = ((_a = form[name]) === null || _a === void 0 ? void 0 : _a.type) || "text";
     const label = config === null || config === void 0 ? void 0 : config.label;
     const required = config === null || config === void 0 ? void 0 : config.required;
@@ -536,6 +563,7 @@ const constructForm = formAccessor => {
       config,
       children,
       customComponent,
+      componentName,
       type,
       label,
       required,
@@ -753,6 +781,7 @@ const useMakForm = ({
     revalidateOn
   }) {
     var _a;
+    console.log("useMakForm handleChange");
     setIsDirty(true);
     const target = event.target;
     const value = (target === null || target === void 0 ? void 0 : target.type) === "checkbox" ? target.checked : target.value;
@@ -782,11 +811,38 @@ const useMakForm = ({
       setErrors(errorsRef.current);
     }
   }
+  const handleChangePublic = (name, value) => {
+    var _a, _b;
+    const elementType = (_a = formRef.current[name]) === null || _a === void 0 ? void 0 : _a.type;
+    const event = {
+      target: {
+        name: name,
+        value,
+        type: elementType
+      }
+    };
+    handleChange({
+      event,
+      validateOn: "change",
+      revalidateOn: "change"
+    });
+    const componentName = getComponentName(name, (_b = formConfig === null || formConfig === void 0 ? void 0 : formConfig[name]) === null || _b === void 0 ? void 0 : _b.componentName);
+    const proxyAccessor = Object.assign(Object.assign({}, formAccessor), {
+      form: formRef.current
+    });
+    const dynamicComponent = componentFactory({
+      formAccessor: proxyAccessor,
+      name
+    });
+    const updatedDynamicComponents = Object.assign(Object.assign({}, dynamicComponents), {
+      [componentName]: dynamicComponent
+    });
+    setDynamicComponents(updatedDynamicComponents);
+  };
   function handleSubmit() {
     const validation = validateForm({
       form: formRef.current || {}
     });
-    console.log("validation", validation);
     if (Object.values(validation).some(error => error)) {
       errorsRef.current = validation;
       setErrors(errorsRef.current);
@@ -801,6 +857,8 @@ const useMakForm = ({
     if (onReset) {
       onReset();
     } else {
+      setForm(originalFormRef.current);
+      formRef.current = originalFormRef.current;
       constructFormAndComponents();
     }
   }
@@ -812,6 +870,7 @@ const useMakForm = ({
         form: originalFormRef.current
       }));
       setDynamicComponents(dynamicComponents);
+      setForm(constructedForm);
     } else {
       formRef.current = constructedForm;
       const errors = validateForm({
@@ -819,6 +878,7 @@ const useMakForm = ({
       });
       beforeValidationErrorsRef.current = errors;
       originalFormRef.current = constructedForm;
+      setForm(originalFormRef.current);
       const dynamicComponents = constructDynamicComponents(formAccessor);
       setDynamicComponents(dynamicComponents);
     }
@@ -827,8 +887,12 @@ const useMakForm = ({
   const getFormValues = () => {
     if (!formRef.current) return;
     const formValues = Object.entries(formRef.current).reduce((acc, [key, value]) => {
+      var _a;
       if ((value === null || value === void 0 ? void 0 : value.type) !== "submit" && (value === null || value === void 0 ? void 0 : value.type) !== "reset") {
         acc[key] = value === null || value === void 0 ? void 0 : value.value;
+      }
+      if (((_a = formConfig === null || formConfig === void 0 ? void 0 : formConfig[key]) === null || _a === void 0 ? void 0 : _a.type) === "number") {
+        acc[key] = Number(value === null || value === void 0 ? void 0 : value.value) || 0;
       }
       return acc;
     }, {});
@@ -847,6 +911,7 @@ const useMakForm = ({
       dirty: isDirty,
       clean: isClean
     },
+    handleChange: handleChangePublic,
     reset: handleReset,
     submit: handleSubmit
   };

@@ -4,6 +4,7 @@ import React, {
   RefObject,
   SelectHTMLAttributes,
   memo,
+  useEffect,
   useRef,
   useState,
 } from "react"
@@ -73,6 +74,7 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
   const componentRef = useRef<HTMLElement>(null)
 
   const handleLocalChange = (e: InputChangeEvent) => {
+    console.log("handleLocalChange")
     if (multiple && e.target instanceof HTMLSelectElement) {
       const selectedOptions = e.target.selectedOptions
 
@@ -95,16 +97,34 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
     onChange && onChange(e)
   }
 
+  const handleCustomComponentChange = (e: any) => {
+    console.log("onChange", e)
+    const value = e?.target?.value || e?.value || e
+    console.log("value", value)
+    const event = {
+      target: {
+        name,
+        value,
+        type,
+      },
+    } as InputChangeEvent
+
+    handleLocalChange(event)
+  }
+
   const resolvedChildrenProps = {
     ...props,
-    handleChange: handleLocalChange,
+    handleChange: handleCustomComponentChange,
     value: localValue,
     valueObjects: getValueObjectsArray(localValue, options || []),
   } as MakFormChildrenProps
+
   if (customComponent) {
     if (typeof customComponent === "function") {
       const CustomComponent = customComponent
       return <CustomComponent {...resolvedChildrenProps} />
+    } else {
+      return customComponent
     }
   }
 

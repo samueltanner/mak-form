@@ -11,11 +11,15 @@ import {
   SelectFieldConfig,
   TextFieldConfig,
   FormAccessor,
+  InputChangeEvent,
 } from "../types/index"
 import { getValueObjectsArray } from "./helpers"
 import React from "react"
 
-export const getComponentName = (fieldName: string) => {
+export const getComponentName = (fieldName: string, componentName?: string) => {
+  if (componentName) {
+    return componentName
+  }
   const words = fieldName.split(/[\s-_]+/)
 
   return words
@@ -30,7 +34,8 @@ export const getInitialComponentNames = ({
 }) => {
   const dummyComponents = {} as any
   Object.keys(formConfig || {}).forEach((fieldName) => {
-    const name = getComponentName(fieldName)
+    const customName = formConfig?.[fieldName]?.componentName
+    const name = getComponentName(fieldName, customName)
     dummyComponents[name] = () => <div />
   })
   if (!formConfig?.Submit) {
@@ -43,7 +48,7 @@ export const getInitialComponentNames = ({
 interface ComponentFactoryProps {
   formAccessor: FormAccessor
   name: string
-  outputType: MakFormComponentOutputType
+  outputType?: MakFormComponentOutputType
 }
 
 const componentFactory = ({
@@ -62,6 +67,7 @@ const componentFactory = ({
   } = formAccessor
 
   const config = form[name] as MakFormFieldConfig
+  const customComponent = config?.customComponent
 
   const type: FieldType = (form[name] as MakFormFieldConfig)?.type || "text"
   const label = config?.label
@@ -141,6 +147,7 @@ const componentFactory = ({
   const hookProps = {
     form,
     handleChange,
+    customComponent,
     formRef,
     validateOn,
     revalidateOn,
@@ -207,8 +214,9 @@ const componentFactory = ({
       <DynamicComponent outputType={outputType} {...hookProps} {...props} />
     )
   }
+  const componentName = getComponentName(name, config?.componentName)
 
-  ComponentWrapper.displayName = `${getComponentName(name)}`
+  ComponentWrapper.displayName = componentName
 
   return ComponentWrapper
 }
@@ -219,7 +227,8 @@ const constructDynamicComponents = (formAccessor: FormAccessor) => {
   const { form, outputType } = formAccessor
 
   return Object.keys(form || {}).reduce((acc, name) => {
-    const componentName = getComponentName(name) as FieldType
+    const componentName = getComponentName(name, form[name]?.componentName)
+
     const component = componentFactory({
       name,
       formAccessor,
