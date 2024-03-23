@@ -99,7 +99,7 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
     } else {
       setLocalValue(e.target.value)
       const event = {
-        target: { name, value: e.target.value || value, type },
+        target: { name, value: e.target.value, type },
       } as InputChangeEvent
 
       handleChange({ event, validateOn, revalidateOn })

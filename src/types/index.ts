@@ -290,6 +290,7 @@ export interface MakFormProps {
   useMakComponents?: boolean
   validateFormOn?: MakFormValidationOption
   revalidateFormOn?: MakFormValidationOption
+  resetOnSubmit?: boolean
 }
 
 export interface FormAccessor {

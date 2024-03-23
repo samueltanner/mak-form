@@ -1,5 +1,5 @@
 import { MakForm, MakFormDynamicComponents, MakFormErrors, MakFormProps } from "../types/index";
-export declare const useMakForm: ({ formConfig, useMakElements, useHTMLElements, useMakComponents, onSubmit, onReset, validateFormOn, revalidateFormOn, }: MakFormProps) => {
+export declare const useMakForm: ({ formConfig, useMakElements, useHTMLElements, useMakComponents, onSubmit, onReset, validateFormOn, revalidateFormOn, resetOnSubmit, }: MakFormProps) => {
     components: MakFormDynamicComponents;
     form: MakForm;
     formState: {

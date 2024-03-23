@@ -3,7 +3,7 @@ import constructForm from "../functions/constructForm";
 import { ensureSingleElementType } from "../functions/helpers";
 import { useEffect, useRef, useState } from "react";
 import { validateField, validateForm } from "../functions/validate";
-export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMakComponents, onSubmit, onReset, validateFormOn = "submit", revalidateFormOn = "none", }) => {
+export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMakComponents, onSubmit, onReset, validateFormOn = "submit", revalidateFormOn = "none", resetOnSubmit = true, }) => {
     const outputType = ensureSingleElementType({
         useMakElements,
         useHTMLElements,
@@ -97,16 +97,27 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
         setDynamicComponents(updatedDynamicComponents);
     };
     function handleSubmit() {
-        const validation = validateForm({ form: formRef.current || {} });
+        const validation = validateForm({ form: form || {} });
+        console.log({ validation, form });
         if (Object.values(validation).some((error) => error)) {
             errorsRef.current = validation;
             setErrors(errorsRef.current);
+            const errorsOnly = Object.entries(validation).reduce((acc, [key, value]) => {
+                if (value) {
+                    ;
+                    acc[key] = value;
+                }
+                return acc;
+            }, {});
+            console.warn("Form has errors", errorsOnly);
             return;
         }
         if (onSubmit) {
-            onSubmit(getFormValues());
+            onSubmit({ values: getFormValues(), errors: validation });
         }
-        constructFormAndComponents();
+        if (resetOnSubmit) {
+            constructFormAndComponents();
+        }
     }
     function handleReset() {
         if (onReset) {
@@ -142,15 +153,13 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
         if (!formRef.current)
             return;
         const formValues = Object.entries(formRef.current).reduce((acc, [key, value]) => {
-            var _a;
             if ((value === null || value === void 0 ? void 0 : value.type) !== "submit" && (value === null || value === void 0 ? void 0 : value.type) !== "reset") {
                 ;
                 acc[key] = value === null || value === void 0 ? void 0 : value.value;
             }
-            if (((_a = formConfig === null || formConfig === void 0 ? void 0 : formConfig[key]) === null || _a === void 0 ? void 0 : _a.type) === "number") {
-                ;
-                acc[key] = Number(value === null || value === void 0 ? void 0 : value.value) || 0;
-            }
+            // if (formConfig?.[key]?.type === "number") {
+            //   ;(acc as any)[key] = Number(value?.value) || 0
+            // }
             return acc;
         }, {});
         return formValues;

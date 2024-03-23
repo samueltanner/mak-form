@@ -28,6 +28,7 @@ export const useMakForm = ({
   onReset,
   validateFormOn = "submit",
   revalidateFormOn = "none",
+  resetOnSubmit = true,
 }: MakFormProps) => {
   const outputType = ensureSingleElementType({
     useMakElements,
@@ -167,16 +168,29 @@ export const useMakForm = ({
   }
 
   function handleSubmit() {
-    const validation = validateForm({ form: formRef.current || {} })
+    const validation = validateForm({ form: form || {} })
+    console.log({ validation, form })
     if (Object.values(validation).some((error) => error)) {
       errorsRef.current = validation
       setErrors(errorsRef.current)
+      const errorsOnly = Object.entries(validation).reduce(
+        (acc, [key, value]) => {
+          if (value) {
+            ;(acc as MakFormErrors)[key] = value
+          }
+          return acc
+        },
+        {}
+      )
+      console.warn("Form has errors", errorsOnly)
       return
     }
     if (onSubmit) {
-      onSubmit(getFormValues())
+      onSubmit({ values: getFormValues(), errors: validation })
     }
-    constructFormAndComponents()
+    if (resetOnSubmit) {
+      constructFormAndComponents()
+    }
   }
 
   function handleReset() {
@@ -220,9 +234,9 @@ export const useMakForm = ({
         if (value?.type !== "submit" && value?.type !== "reset") {
           ;(acc as any)[key] = value?.value
         }
-        if (formConfig?.[key]?.type === "number") {
-          ;(acc as any)[key] = Number(value?.value) || 0
-        }
+        // if (formConfig?.[key]?.type === "number") {
+        //   ;(acc as any)[key] = Number(value?.value) || 0
+        // }
 
         return acc
       },

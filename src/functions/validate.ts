@@ -6,7 +6,7 @@ import {
   MakFormFieldConfig,
   NumberFieldConfig,
   TextFieldConfig,
-} from "../types/index";
+} from "../types/index"
 
 const validateField = ({
   form,
@@ -37,7 +37,7 @@ const validateField = ({
 
   const errors = {} as MakFormErrors
 
-  if (required && !value && value !== 0) {
+  if (required && !value && value !== 0 && value !== false) {
     const errorString = `${label} is required.`
     // setFormErrors((prev) => ({
     //   ...prev,
@@ -107,8 +107,7 @@ const validateForm = ({ form }: { form: MakForm }) => {
   Object.keys(form).forEach((fieldName) => {
     if (fieldName === "submit" || fieldName === "reset") return
 
-    const value = form?.[fieldName]?.value || form?.[fieldName]?.defaultValue
-
+    const value = form?.[fieldName]?.value
     const validation = validateField({
       fieldName,
       value,

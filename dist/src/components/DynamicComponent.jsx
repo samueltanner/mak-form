@@ -37,7 +37,7 @@ const DynamicComponentStruct = (props) => {
         else {
             setLocalValue(e.target.value);
             const event = {
-                target: { name, value: e.target.value || value, type },
+                target: { name, value: e.target.value, type },
             };
             handleChange({ event, validateOn, revalidateOn });
         }

@@ -14,7 +14,7 @@ const validateField = ({ form, fieldName, value, }) => {
     const min1 = config === null || config === void 0 ? void 0 : config.min1;
     const max1 = config === null || config === void 0 ? void 0 : config.max1;
     const errors = {};
-    if (required && !value && value !== 0) {
+    if (required && !value && value !== 0 && value !== false) {
         const errorString = `${label} is required.`;
         // setFormErrors((prev) => ({
         //   ...prev,
@@ -75,10 +75,10 @@ const validateField = ({ form, fieldName, value, }) => {
 const validateForm = ({ form }) => {
     const errors = {};
     Object.keys(form).forEach((fieldName) => {
-        var _a, _b;
+        var _a;
         if (fieldName === "submit" || fieldName === "reset")
             return;
-        const value = ((_a = form === null || form === void 0 ? void 0 : form[fieldName]) === null || _a === void 0 ? void 0 : _a.value) || ((_b = form === null || form === void 0 ? void 0 : form[fieldName]) === null || _b === void 0 ? void 0 : _b.defaultValue);
+        const value = (_a = form === null || form === void 0 ? void 0 : form[fieldName]) === null || _a === void 0 ? void 0 : _a.value;
         const validation = validateField({
             fieldName,
             value,
