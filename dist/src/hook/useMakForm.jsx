@@ -49,7 +49,6 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
         var _a;
         setIsDirty(true);
         const target = event.target;
-        console.log({ target, event });
         const value = target.value || target.checked;
         const fieldName = target.name;
         const prev = formRef.current;

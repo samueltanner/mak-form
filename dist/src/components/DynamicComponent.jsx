@@ -28,7 +28,6 @@ const DynamicComponentStruct = (props) => {
         }
         else if (e.target instanceof HTMLInputElement &&
             (e.target.type === "checkbox" || e.target.type === "radio")) {
-            console.log("CHECKED", e.target.checked);
             setLocalValue(e.target.checked);
             const event = {
                 target: { name, checked: e.target.checked, type },

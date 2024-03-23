@@ -141,7 +141,6 @@ const DynamicComponentStruct = props => {
         revalidateOn
       });
     } else if (e.target instanceof HTMLInputElement && (e.target.type === "checkbox" || e.target.type === "radio")) {
-      console.log("CHECKED", e.target.checked);
       setLocalValue(e.target.checked);
       const event = {
         target: {
@@ -821,10 +820,6 @@ const useMakForm = ({
     var _a;
     setIsDirty(true);
     const target = event.target;
-    console.log({
-      target,
-      event
-    });
     const value = target.value || target.checked;
     const fieldName = target.name;
     const prev = formRef.current;
