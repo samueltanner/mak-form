@@ -101,6 +101,7 @@ const DynamicComponentStruct = props => {
       makClassName,
       pattern,
       value,
+      checked,
       valueObjects,
       placeholder,
       options,
@@ -119,7 +120,7 @@ const DynamicComponentStruct = props => {
       revalidateOn,
       formRef
     } = props,
-    otherProps = __rest(props, ["form", "config", "children", "customComponent", "handleChange", "outputType", "type", "name", "label", "defaultValue", "className", "makClassName", "pattern", "value", "valueObjects", "placeholder", "options", "labelKey", "valueKey", "multiple", "onClick", "onBlur", "onFocus", "onSubmit", "onReset", "onChange", "formOnSubmit", "formOnReset", "validateOn", "revalidateOn", "formRef"]);
+    otherProps = __rest(props, ["form", "config", "children", "customComponent", "handleChange", "outputType", "type", "name", "label", "defaultValue", "className", "makClassName", "pattern", "value", "checked", "valueObjects", "placeholder", "options", "labelKey", "valueKey", "multiple", "onClick", "onBlur", "onFocus", "onSubmit", "onReset", "onChange", "formOnSubmit", "formOnReset", "validateOn", "revalidateOn", "formRef"]);
   const [localValue, setLocalValue] = React.useState(value);
   const componentRef = React.useRef(null);
   const handleLocalChange = e => {
@@ -131,6 +132,21 @@ const DynamicComponentStruct = props => {
         target: {
           name,
           value: selectedValues || value,
+          type
+        }
+      };
+      handleChange({
+        event,
+        validateOn,
+        revalidateOn
+      });
+    } else if (e.target instanceof HTMLInputElement && (e.target.type === "checkbox" || e.target.type === "radio")) {
+      console.log("CHECKED", e.target.checked);
+      setLocalValue(e.target.checked);
+      const event = {
+        target: {
+          name,
+          checked: e.target.checked,
           type
         }
       };
@@ -157,8 +173,8 @@ const DynamicComponentStruct = props => {
     onChange && onChange(e);
   };
   const handleCustomComponentChange = e => {
-    var _a;
-    const value = ((_a = e === null || e === void 0 ? void 0 : e.target) === null || _a === void 0 ? void 0 : _a.value) || (e === null || e === void 0 ? void 0 : e.value) || e;
+    var _a, _b;
+    const value = ((_a = e === null || e === void 0 ? void 0 : e.target) === null || _a === void 0 ? void 0 : _a.value) || ((_b = e === null || e === void 0 ? void 0 : e.target) === null || _b === void 0 ? void 0 : _b.checked) || (e === null || e === void 0 ? void 0 : e.value) || e;
     const event = {
       target: {
         name,
@@ -265,6 +281,27 @@ const DynamicComponentStruct = props => {
         value: option[valueKey]
       }, option[labelKey]);
     }));
+  }
+  if (["checkbox", "radio"].includes(type) && outputType === "htmlElements") {
+    return /*#__PURE__*/React__default["default"].createElement("input", _extends({
+      type: type,
+      checked: localValue,
+      onChange: handleLocalChange,
+      onBlur: onBlur,
+      className: className,
+      ref: componentRef
+    }, otherProps));
+  }
+  if (["checkbox", "radio"].includes(type) && outputType === "makElements") {
+    return /*#__PURE__*/React__default["default"].createElement(makUi.mak.input, _extends({
+      type: type,
+      checked: localValue,
+      onChange: handleLocalChange,
+      onBlur: onBlur,
+      className: className,
+      makClassName: makClassName,
+      ref: componentRef
+    }, otherProps));
   }
   if (outputType === "htmlElements") {
     return /*#__PURE__*/React__default["default"].createElement("input", _extends({
@@ -535,7 +572,7 @@ const constructForm = formAccessor => {
     const validateOn = config === null || config === void 0 ? void 0 : config.validateOn;
     // "boolean"
     const checked = config === null || config === void 0 ? void 0 : config.checked;
-    const defaultChecked = config === null || config === void 0 ? void 0 : config.defaultChecked;
+    const defaultChecked = (config === null || config === void 0 ? void 0 : config.defaultChecked) || defaultValue;
     // "number" | "range" | "bounded-range"
     const min = config === null || config === void 0 ? void 0 : config.min;
     const max = config === null || config === void 0 ? void 0 : config.max;
@@ -784,7 +821,11 @@ const useMakForm = ({
     var _a;
     setIsDirty(true);
     const target = event.target;
-    const value = (target === null || target === void 0 ? void 0 : target.type) === "checkbox" ? target.checked : target.value;
+    console.log({
+      target,
+      event
+    });
+    const value = target.value || target.checked;
     const fieldName = target.name;
     const prev = formRef.current;
     const prevField = prev[fieldName];

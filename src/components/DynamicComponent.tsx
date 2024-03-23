@@ -49,6 +49,7 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
     makClassName,
     pattern,
     value,
+    checked,
     valueObjects,
     placeholder,
     options,
@@ -85,6 +86,16 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
         target: { name, value: selectedValues || value, type },
       } as InputChangeEvent
       handleChange({ event, validateOn, revalidateOn })
+    } else if (
+      e.target instanceof HTMLInputElement &&
+      (e.target.type === "checkbox" || e.target.type === "radio")
+    ) {
+      setLocalValue(e.target.checked)
+      const event = {
+        target: { name, checked: e.target.checked, type },
+      } as InputChangeEvent
+
+      handleChange({ event, validateOn, revalidateOn })
     } else {
       setLocalValue(e.target.value)
       const event = {
@@ -97,7 +108,7 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
   }
 
   const handleCustomComponentChange = (e: any) => {
-    const value = e?.target?.value || e?.value || e
+    const value = e?.target?.value || e?.target?.checked || e?.value || e
 
     const event = {
       target: {
@@ -256,6 +267,35 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
           )
         })}
       </mak.select>
+    )
+  }
+
+  if (["checkbox", "radio"].includes(type) && outputType === "htmlElements") {
+    return (
+      <input
+        type={type}
+        checked={localValue as InputHTMLAttributes<HTMLInputElement>["checked"]}
+        onChange={handleLocalChange}
+        onBlur={onBlur}
+        className={className}
+        ref={componentRef as RefObject<HTMLInputElement>}
+        {...otherProps}
+      />
+    )
+  }
+
+  if (["checkbox", "radio"].includes(type) && outputType === "makElements") {
+    return (
+      <mak.input
+        type={type}
+        checked={localValue as InputHTMLAttributes<HTMLInputElement>["checked"]}
+        onChange={handleLocalChange}
+        onBlur={onBlur}
+        className={className}
+        makClassName={makClassName}
+        ref={componentRef as RefObject<HTMLInputElement>}
+        {...otherProps}
+      />
     )
   }
 

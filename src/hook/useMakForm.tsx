@@ -88,8 +88,7 @@ export const useMakForm = ({
   }) {
     setIsDirty(true)
     const target = event.target as HTMLInputElement
-
-    const value = target?.type === "checkbox" ? target.checked : target.value
+    const value = target.value || target.checked
     const fieldName = target.name
 
     const prev = formRef.current as MakForm
@@ -224,6 +223,7 @@ export const useMakForm = ({
         if (formConfig?.[key]?.type === "number") {
           ;(acc as any)[key] = Number(value?.value) || 0
         }
+
         return acc
       },
       {}

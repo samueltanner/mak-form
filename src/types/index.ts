@@ -14,6 +14,7 @@ export type InputChangeEvent = {
     name: string
     value: string | string[] | number | boolean | number[]
     type: string
+    checked?: boolean
   }
 }
 

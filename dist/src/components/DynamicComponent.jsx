@@ -13,7 +13,7 @@ import React, { memo, useRef, useState, } from "react";
 import { mak } from "@mak-stack/mak-ui";
 import { getValueObjectsArray } from "../functions/helpers";
 const DynamicComponentStruct = (props) => {
-    const { form, config, children, customComponent, handleChange, outputType, type, name, label, defaultValue, className, makClassName, pattern, value, valueObjects, placeholder, options, labelKey, valueKey, multiple, onClick, onBlur, onFocus, onSubmit, onReset, onChange, formOnSubmit, formOnReset, validateOn, revalidateOn, formRef } = props, otherProps = __rest(props, ["form", "config", "children", "customComponent", "handleChange", "outputType", "type", "name", "label", "defaultValue", "className", "makClassName", "pattern", "value", "valueObjects", "placeholder", "options", "labelKey", "valueKey", "multiple", "onClick", "onBlur", "onFocus", "onSubmit", "onReset", "onChange", "formOnSubmit", "formOnReset", "validateOn", "revalidateOn", "formRef"]);
+    const { form, config, children, customComponent, handleChange, outputType, type, name, label, defaultValue, className, makClassName, pattern, value, checked, valueObjects, placeholder, options, labelKey, valueKey, multiple, onClick, onBlur, onFocus, onSubmit, onReset, onChange, formOnSubmit, formOnReset, validateOn, revalidateOn, formRef } = props, otherProps = __rest(props, ["form", "config", "children", "customComponent", "handleChange", "outputType", "type", "name", "label", "defaultValue", "className", "makClassName", "pattern", "value", "checked", "valueObjects", "placeholder", "options", "labelKey", "valueKey", "multiple", "onClick", "onBlur", "onFocus", "onSubmit", "onReset", "onChange", "formOnSubmit", "formOnReset", "validateOn", "revalidateOn", "formRef"]);
     const [localValue, setLocalValue] = useState(value);
     const componentRef = useRef(null);
     const handleLocalChange = (e) => {
@@ -23,6 +23,15 @@ const DynamicComponentStruct = (props) => {
             setLocalValue(selectedValues);
             const event = {
                 target: { name, value: selectedValues || value, type },
+            };
+            handleChange({ event, validateOn, revalidateOn });
+        }
+        else if (e.target instanceof HTMLInputElement &&
+            (e.target.type === "checkbox" || e.target.type === "radio")) {
+            console.log("CHECKED", e.target.checked);
+            setLocalValue(e.target.checked);
+            const event = {
+                target: { name, checked: e.target.checked, type },
             };
             handleChange({ event, validateOn, revalidateOn });
         }
@@ -36,8 +45,8 @@ const DynamicComponentStruct = (props) => {
         onChange && onChange(e);
     };
     const handleCustomComponentChange = (e) => {
-        var _a;
-        const value = ((_a = e === null || e === void 0 ? void 0 : e.target) === null || _a === void 0 ? void 0 : _a.value) || (e === null || e === void 0 ? void 0 : e.value) || e;
+        var _a, _b;
+        const value = ((_a = e === null || e === void 0 ? void 0 : e.target) === null || _a === void 0 ? void 0 : _a.value) || ((_b = e === null || e === void 0 ? void 0 : e.target) === null || _b === void 0 ? void 0 : _b.checked) || (e === null || e === void 0 ? void 0 : e.value) || e;
         const event = {
             target: {
                 name,
@@ -115,6 +124,12 @@ const DynamicComponentStruct = (props) => {
             </option>);
             })}
       </mak.select>);
+    }
+    if (["checkbox", "radio"].includes(type) && outputType === "htmlElements") {
+        return (<input type={type} checked={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} ref={componentRef} {...otherProps}/>);
+    }
+    if (["checkbox", "radio"].includes(type) && outputType === "makElements") {
+        return (<mak.input type={type} checked={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} makClassName={makClassName} ref={componentRef} {...otherProps}/>);
     }
     if (outputType === "htmlElements") {
         return (<input type={type} value={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} defaultValue={defaultValue} ref={componentRef} {...otherProps}/>);
