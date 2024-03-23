@@ -37,7 +37,7 @@ const validateField = ({
 
   const errors = {} as MakFormErrors
 
-  if (required && !value) {
+  if (required && !value && value !== 0) {
     const errorString = `${label} is required.`
     // setFormErrors((prev) => ({
     //   ...prev,

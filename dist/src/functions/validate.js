@@ -14,7 +14,7 @@ const validateField = ({ form, fieldName, value, }) => {
     const min1 = config === null || config === void 0 ? void 0 : config.min1;
     const max1 = config === null || config === void 0 ? void 0 : config.max1;
     const errors = {};
-    if (required && !value) {
+    if (required && !value && value !== 0) {
         const errorString = `${label} is required.`;
         // setFormErrors((prev) => ({
         //   ...prev,
