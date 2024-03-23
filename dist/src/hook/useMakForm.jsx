@@ -98,7 +98,6 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
     };
     function handleSubmit() {
         const validation = validateForm({ form: form || {} });
-        console.log({ validation, form });
         if (Object.values(validation).some((error) => error)) {
             errorsRef.current = validation;
             setErrors(errorsRef.current);
