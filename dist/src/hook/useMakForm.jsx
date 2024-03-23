@@ -108,7 +108,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
                 }
                 return acc;
             }, {});
-            console.warn("Form has errors", errorsOnly);
+            console.warn("Form has errors:", errorsOnly);
             return;
         }
         if (onSubmit) {
