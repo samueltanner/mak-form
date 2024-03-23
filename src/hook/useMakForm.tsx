@@ -186,7 +186,7 @@ export const useMakForm = ({
       return
     }
     if (onSubmit) {
-      onSubmit({ values: getFormValues(), errors: validation })
+      onSubmit(getFormValues())
     }
     if (resetOnSubmit) {
       constructFormAndComponents()

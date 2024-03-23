@@ -113,7 +113,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             return;
         }
         if (onSubmit) {
-            onSubmit({ values: getFormValues(), errors: validation });
+            onSubmit(getFormValues());
         }
         if (resetOnSubmit) {
             constructFormAndComponents();
