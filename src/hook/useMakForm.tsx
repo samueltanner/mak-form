@@ -174,7 +174,7 @@ export const useMakForm = ({
       return
     }
     if (onSubmit) {
-      onSubmit(formRef.current)
+      onSubmit(getFormValues())
     }
     constructFormAndComponents()
   }
@@ -213,7 +213,7 @@ export const useMakForm = ({
     setIsDirty(false)
   }
 
-  const getFormValues = () => {
+  function getFormValues() {
     if (!formRef.current) return
     const formValues = Object.entries(formRef.current).reduce(
       (acc, [key, value]) => {

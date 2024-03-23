@@ -104,7 +104,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             return;
         }
         if (onSubmit) {
-            onSubmit(formRef.current);
+            onSubmit(getFormValues());
         }
         constructFormAndComponents();
     }
@@ -138,7 +138,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
         }
         setIsDirty(false);
     };
-    const getFormValues = () => {
+    function getFormValues() {
         if (!formRef.current)
             return;
         const formValues = Object.entries(formRef.current).reduce((acc, [key, value]) => {
@@ -154,7 +154,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             return acc;
         }, {});
         return formValues;
-    };
+    }
     useEffect(() => {
         constructFormAndComponents();
     }, [formConfig]);

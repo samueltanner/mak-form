@@ -885,7 +885,7 @@ const useMakForm = ({
       return;
     }
     if (onSubmit) {
-      onSubmit(formRef.current);
+      onSubmit(getFormValues());
     }
     constructFormAndComponents();
   }
@@ -920,7 +920,7 @@ const useMakForm = ({
     }
     setIsDirty(false);
   };
-  const getFormValues = () => {
+  function getFormValues() {
     if (!formRef.current) return;
     const formValues = Object.entries(formRef.current).reduce((acc, [key, value]) => {
       var _a;
@@ -933,7 +933,7 @@ const useMakForm = ({
       return acc;
     }, {});
     return formValues;
-  };
+  }
   React.useEffect(() => {
     constructFormAndComponents();
   }, [formConfig]);
