@@ -181,7 +181,7 @@ export const useMakForm = ({
         },
         {}
       )
-      console.warn("Form has errors", errorsOnly)
+      console.warn("Form has errors:", errorsOnly)
       return
     }
     if (onSubmit) {
