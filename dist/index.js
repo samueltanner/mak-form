@@ -933,12 +933,13 @@ const useMakForm = ({
   function getFormValues() {
     if (!formRef.current) return;
     const formValues = Object.entries(formRef.current).reduce((acc, [key, value]) => {
+      var _a;
       if ((value === null || value === void 0 ? void 0 : value.type) !== "submit" && (value === null || value === void 0 ? void 0 : value.type) !== "reset") {
         acc[key] = value === null || value === void 0 ? void 0 : value.value;
       }
-      // if (formConfig?.[key]?.type === "number") {
-      //   ;(acc as any)[key] = Number(value?.value) || 0
-      // }
+      if (((_a = formConfig === null || formConfig === void 0 ? void 0 : formConfig[key]) === null || _a === void 0 ? void 0 : _a.type) === "number") {
+        acc[key] = Number(value === null || value === void 0 ? void 0 : value.value) || 0;
+      }
       return acc;
     }, {});
     return formValues;

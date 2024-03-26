@@ -233,9 +233,9 @@ export const useMakForm = ({
         if (value?.type !== "submit" && value?.type !== "reset") {
           ;(acc as any)[key] = value?.value
         }
-        // if (formConfig?.[key]?.type === "number") {
-        //   ;(acc as any)[key] = Number(value?.value) || 0
-        // }
+        if (formConfig?.[key]?.type === "number") {
+          ;(acc as any)[key] = Number(value?.value) || 0
+        }
 
         return acc
       },
