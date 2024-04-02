@@ -1,6 +1,6 @@
 import componentFactory, { constructDynamicComponents, getComponentName, getInitialComponentNames, } from "../functions/componentFactory";
 import constructForm from "../functions/constructForm";
-import { ensureSingleElementType } from "../functions/helpers";
+import { deepEqual, ensureSingleElementType } from "../functions/helpers";
 import { useEffect, useRef, useState } from "react";
 import { validateField, validateForm } from "../functions/validate";
 export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMakComponents, onSubmit, onReset, validateFormOn = "submit", revalidateFormOn = "none", resetOnSubmit = true, }) => {
@@ -21,14 +21,6 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
     }, {}));
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
-    // const [formErrors, setFormErrors] = useState<MakFormErrors>(
-    //   Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
-    //     if (!["button", "submit", "reset"].includes((value as any)?.type)) {
-    //       ;(acc as MakFormErrors)[key] = undefined
-    //     }
-    //     return acc
-    //   }, {})
-    // )
     const [dynamicComponents, setDynamicComponents] = useState(getInitialComponentNames({ formConfig }));
     const [isDirty, setIsDirty] = useState(false);
     const [isClean, setIsClean] = useState(true);
@@ -168,6 +160,17 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
     useEffect(() => {
         constructFormAndComponents();
     }, [formConfig]);
+    const valuesRef = useRef(undefined);
+    useEffect(() => {
+        if (!valuesRef.current) {
+            valuesRef.current = getFormValues();
+        }
+        if (!deepEqual(valuesRef.current, getFormValues())) {
+            console.log("formValues", getFormValues());
+            valuesRef.current = getFormValues();
+            constructFormAndComponents();
+        }
+    });
     return {
         form: form,
         components: dynamicComponents,

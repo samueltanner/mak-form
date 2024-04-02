@@ -88,6 +88,28 @@ const getValueObjectsArray = (value, options) => {
     }
   });
 };
+const deepEqual = (obj1, obj2) => {
+  if (obj1 === obj2) {
+    return true;
+  }
+  if (obj1 === null || typeof obj1 !== "object" || obj2 === null || typeof obj2 !== "object") {
+    return false;
+  }
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+  for (const key of keys1) {
+    if (!keys2.includes(key)) {
+      return false;
+    }
+    if (!deepEqual(obj1[key], obj2[key])) {
+      return false;
+    }
+  }
+  return true;
+};
 
 dayjs__default["default"].extend(isoWeek__default["default"]);
 const DynamicComponentStruct = props => {
@@ -853,14 +875,6 @@ const useMakForm = ({
   }, {}));
   const [form, setForm] = React.useState({});
   const [errors, setErrors] = React.useState({});
-  // const [formErrors, setFormErrors] = useState<MakFormErrors>(
-  //   Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
-  //     if (!["button", "submit", "reset"].includes((value as any)?.type)) {
-  //       ;(acc as MakFormErrors)[key] = undefined
-  //     }
-  //     return acc
-  //   }, {})
-  // )
   const [dynamicComponents, setDynamicComponents] = React.useState(getInitialComponentNames({
     formConfig
   }));
@@ -1013,6 +1027,17 @@ const useMakForm = ({
   React.useEffect(() => {
     constructFormAndComponents();
   }, [formConfig]);
+  const valuesRef = React.useRef(undefined);
+  React.useEffect(() => {
+    if (!valuesRef.current) {
+      valuesRef.current = getFormValues();
+    }
+    if (!deepEqual(valuesRef.current, getFormValues())) {
+      console.log("formValues", getFormValues());
+      valuesRef.current = getFormValues();
+      constructFormAndComponents();
+    }
+  });
   return {
     form: form,
     components: dynamicComponents,

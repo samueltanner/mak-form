@@ -4,7 +4,7 @@ import componentFactory, {
   getInitialComponentNames,
 } from "../functions/componentFactory"
 import constructForm from "../functions/constructForm"
-import { ensureSingleElementType } from "../functions/helpers"
+import { deepEqual, ensureSingleElementType } from "../functions/helpers"
 import React, { useEffect, useRef, useState } from "react"
 import {
   FormAccessor,
@@ -50,14 +50,7 @@ export const useMakForm = ({
 
   const [form, setForm] = useState<MakForm>({})
   const [errors, setErrors] = useState<MakFormErrors>({})
-  // const [formErrors, setFormErrors] = useState<MakFormErrors>(
-  //   Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
-  //     if (!["button", "submit", "reset"].includes((value as any)?.type)) {
-  //       ;(acc as MakFormErrors)[key] = undefined
-  //     }
-  //     return acc
-  //   }, {})
-  // )
+
   const [dynamicComponents, setDynamicComponents] =
     useState<MakFormDynamicComponents>(getInitialComponentNames({ formConfig }))
   const [isDirty, setIsDirty] = useState(false)
@@ -248,6 +241,18 @@ export const useMakForm = ({
   useEffect(() => {
     constructFormAndComponents()
   }, [formConfig])
+
+  const valuesRef = useRef<any>(undefined)
+  useEffect(() => {
+    if (!valuesRef.current) {
+      valuesRef.current = getFormValues()
+    }
+    if (!deepEqual(valuesRef.current, getFormValues())) {
+      console.log("formValues", getFormValues())
+      valuesRef.current = getFormValues()
+      constructFormAndComponents()
+    }
+  })
 
   return {
     form: form,

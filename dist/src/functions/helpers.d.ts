@@ -5,3 +5,4 @@ export declare const ensureSingleElementType: ({ useMakElements, useHTMLElements
     useMakComponents?: boolean | undefined;
 }) => MakFormComponentOutputType;
 export declare const getValueObjectsArray: (value: any, options: any[]) => any[];
+export declare const deepEqual: (obj1: any, obj2: any) => boolean;
