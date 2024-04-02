@@ -55,7 +55,6 @@ export type FieldType =
   | "bounded-range"
   | "button"
   | "date"
-  | "datetime"
   | "datetime-local"
   | "time"
   | "week"
@@ -156,7 +155,7 @@ export interface NumberFieldConfig extends BaseFieldConfig {
 }
 
 export interface DateFieldConfig extends BaseFieldConfig {
-  type: "date" | "datetime" | "datetime-local" | "month" | "time" | "week"
+  type: "date" | "datetime-local" | "month" | "time" | "week"
   min?: number
   max?: number
   step?: number
@@ -216,6 +215,7 @@ export type MakFormDynamicComponentProps = {
     | React.ReactNode
     | ((props: MakFormChildrenProps) => React.ReactNode)
   customComponent?: React.ElementType<MakFormChildrenProps> | React.ReactNode
+  type?: FieldType
 
   required?: boolean
   defaultValue?: ValueOptions

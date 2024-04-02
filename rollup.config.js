@@ -16,10 +16,5 @@ export default {
       presets: ["@babel/preset-react"],
     }),
   ],
-  external: [
-    "react",
-    "react-dom",
-    "tailwindcss",
-    "@mak-stack/mak-ui",
-  ],
+  external: ["react", "react-dom", "tailwindcss", "@mak-stack/mak-ui", "dayjs", "dayjs/plugin/isoWeek"],
 }

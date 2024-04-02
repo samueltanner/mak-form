@@ -24,7 +24,7 @@ export type OptionType = {
     [key: string]: string | number | undefined;
 };
 export type ValueOptions = string | boolean | undefined | number | OptionType | OptionType[] | boolean | string[] | number[];
-export type FieldType = "color" | "button" | "boolean" | "bounded-range" | "button" | "date" | "datetime" | "datetime-local" | "time" | "week" | "month" | "multi-select" | "number" | "password" | "radio" | "radio-group" | "range" | "select" | "searchable-select" | "text" | "toggle" | "checkbox" | "email" | "search" | "tel" | "time" | "submit" | "reset";
+export type FieldType = "color" | "button" | "boolean" | "bounded-range" | "button" | "date" | "datetime-local" | "time" | "week" | "month" | "multi-select" | "number" | "password" | "radio" | "radio-group" | "range" | "select" | "searchable-select" | "text" | "toggle" | "checkbox" | "email" | "search" | "tel" | "time" | "submit" | "reset";
 export interface BaseFieldConfig {
     type: FieldType;
     label: string;
@@ -92,7 +92,7 @@ export interface NumberFieldConfig extends BaseFieldConfig {
     step?: number;
 }
 export interface DateFieldConfig extends BaseFieldConfig {
-    type: "date" | "datetime" | "datetime-local" | "month" | "time" | "week";
+    type: "date" | "datetime-local" | "month" | "time" | "week";
     min?: number;
     max?: number;
     step?: number;
@@ -133,6 +133,7 @@ export type MakForm = {
 export type MakFormDynamicComponentProps = {
     children?: React.ReactNode | ((props: MakFormChildrenProps) => React.ReactNode);
     customComponent?: React.ElementType<MakFormChildrenProps> | React.ReactNode;
+    type?: FieldType;
     required?: boolean;
     defaultValue?: ValueOptions;
     disabled?: boolean;

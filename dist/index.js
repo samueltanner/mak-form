@@ -4,10 +4,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var React = require('react');
 var makUi = require('@mak-stack/mak-ui');
+var dayjs = require('dayjs');
+var isoWeek = require('dayjs/plugin/isoWeek');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var React__default = /*#__PURE__*/_interopDefaultLegacy(React);
+var dayjs__default = /*#__PURE__*/_interopDefaultLegacy(dayjs);
+var isoWeek__default = /*#__PURE__*/_interopDefaultLegacy(isoWeek);
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -85,6 +89,7 @@ const getValueObjectsArray = (value, options) => {
   });
 };
 
+dayjs__default["default"].extend(isoWeek__default["default"]);
 const DynamicComponentStruct = props => {
   const {
       form,
@@ -301,6 +306,67 @@ const DynamicComponentStruct = props => {
       makClassName: makClassName,
       ref: componentRef
     }, otherProps));
+  }
+  if (["date", "datetime", "datetime-local", "time", "week", "month"].includes(type)) {
+    const formatDate = ({
+      type,
+      inputDate = dayjs__default["default"]()
+    }) => {
+      let date = dayjs__default["default"](inputDate);
+      if (!inputDate || inputDate === "") {
+        date = dayjs__default["default"]();
+      }
+      switch (type) {
+        case "date":
+          return date.format("YYYY-MM-DD");
+        case "datetime-local":
+          return date.format("YYYY-MM-DDTHH:mm");
+        case "time":
+          return date.format("HH:mm");
+        case "week":
+          return `${date.format("YYYY")}-W${date.isoWeek()}`;
+        case "month":
+          return date.format("YYYY-MM");
+        default:
+          return "";
+      }
+    };
+    if (outputType === "htmlElements") {
+      return /*#__PURE__*/React__default["default"].createElement("input", _extends({
+        type: type,
+        value: formatDate({
+          type,
+          inputDate: localValue
+        }),
+        onChange: handleLocalChange,
+        onBlur: onBlur,
+        className: className,
+        placeholder: placeholder,
+        defaultValue: formatDate({
+          type,
+          inputDate: defaultValue
+        }),
+        ref: componentRef
+      }, otherProps));
+    }
+    if (outputType === "makElements") {
+      return /*#__PURE__*/React__default["default"].createElement(makUi.mak.input, _extends({
+        type: type,
+        value: formatDate({
+          type,
+          inputDate: localValue
+        }),
+        onChange: handleLocalChange,
+        onBlur: onBlur,
+        className: className,
+        placeholder: placeholder,
+        defaultValue: formatDate({
+          type,
+          inputDate: defaultValue
+        }),
+        ref: componentRef
+      }, otherProps));
+    }
   }
   if (outputType === "htmlElements") {
     return /*#__PURE__*/React__default["default"].createElement("input", _extends({

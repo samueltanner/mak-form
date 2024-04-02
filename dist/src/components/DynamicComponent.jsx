@@ -12,6 +12,9 @@ var __rest = (this && this.__rest) || function (s, e) {
 import React, { memo, useRef, useState, } from "react";
 import { mak } from "@mak-stack/mak-ui";
 import { getValueObjectsArray } from "../functions/helpers";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
+dayjs.extend(isoWeek);
 const DynamicComponentStruct = (props) => {
     const { form, config, children, customComponent, handleChange, outputType, type, name, label, defaultValue, className, makClassName, pattern, value, checked, valueObjects, placeholder, options, labelKey, valueKey, multiple, onClick, onBlur, onFocus, onSubmit, onReset, onChange, formOnSubmit, formOnReset, validateOn, revalidateOn, formRef } = props, otherProps = __rest(props, ["form", "config", "children", "customComponent", "handleChange", "outputType", "type", "name", "label", "defaultValue", "className", "makClassName", "pattern", "value", "checked", "valueObjects", "placeholder", "options", "labelKey", "valueKey", "multiple", "onClick", "onBlur", "onFocus", "onSubmit", "onReset", "onChange", "formOnSubmit", "formOnReset", "validateOn", "revalidateOn", "formRef"]);
     const [localValue, setLocalValue] = useState(value);
@@ -129,6 +132,40 @@ const DynamicComponentStruct = (props) => {
     }
     if (["checkbox", "radio"].includes(type) && outputType === "makElements") {
         return (<mak.input type={type} checked={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} makClassName={makClassName} ref={componentRef} {...otherProps}/>);
+    }
+    if (["date", "datetime", "datetime-local", "time", "week", "month"].includes(type)) {
+        const formatDate = ({ type, inputDate = dayjs(), }) => {
+            let date = dayjs(inputDate);
+            if (!inputDate || inputDate === "") {
+                date = dayjs();
+            }
+            switch (type) {
+                case "date":
+                    return date.format("YYYY-MM-DD");
+                case "datetime-local":
+                    return date.format("YYYY-MM-DDTHH:mm");
+                case "time":
+                    return date.format("HH:mm");
+                case "week":
+                    return `${date.format("YYYY")}-W${date.isoWeek()}`;
+                case "month":
+                    return date.format("YYYY-MM");
+                default:
+                    return "";
+            }
+        };
+        if (outputType === "htmlElements") {
+            return (<input type={type} value={formatDate({
+                    type,
+                    inputDate: localValue,
+                })} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} defaultValue={formatDate({ type, inputDate: defaultValue })} ref={componentRef} {...otherProps}/>);
+        }
+        if (outputType === "makElements") {
+            return (<mak.input type={type} value={formatDate({
+                    type,
+                    inputDate: localValue,
+                })} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} defaultValue={formatDate({ type, inputDate: defaultValue })} ref={componentRef} {...otherProps}/>);
+        }
     }
     if (outputType === "htmlElements") {
         return (<input type={type} value={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} defaultValue={defaultValue} ref={componentRef} {...otherProps}/>);

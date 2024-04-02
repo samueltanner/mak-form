@@ -4,7 +4,6 @@ import React, {
   RefObject,
   SelectHTMLAttributes,
   memo,
-  useEffect,
   useRef,
   useState,
 } from "react"
@@ -19,6 +18,9 @@ import {
   FormAccessor,
 } from "../types/index"
 import { getValueObjectsArray } from "../functions/helpers"
+import dayjs from "dayjs"
+import isoWeek from "dayjs/plugin/isoWeek"
+dayjs.extend(isoWeek)
 
 type DynamicComponentProps = MakFormDynamicComponentProps &
   FormAccessor & {
@@ -297,6 +299,77 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
         {...otherProps}
       />
     )
+  }
+
+  if (
+    ["date", "datetime", "datetime-local", "time", "week", "month"].includes(
+      type
+    )
+  ) {
+    const formatDate = ({
+      type,
+      inputDate = dayjs(),
+    }: {
+      type: FieldType
+      inputDate?: dayjs.Dayjs | string
+    }) => {
+      let date = dayjs(inputDate)
+      if (!inputDate || inputDate === "") {
+        date = dayjs()
+      }
+
+      switch (type) {
+        case "date":
+          return date.format("YYYY-MM-DD")
+        case "datetime-local":
+          return date.format("YYYY-MM-DDTHH:mm")
+        case "time":
+          return date.format("HH:mm")
+        case "week":
+          return `${date.format("YYYY")}-W${date.isoWeek()}`
+        case "month":
+          return date.format("YYYY-MM")
+        default:
+          return ""
+      }
+    }
+
+    if (outputType === "htmlElements") {
+      return (
+        <input
+          type={type}
+          value={formatDate({
+            type,
+            inputDate: localValue as string,
+          })}
+          onChange={handleLocalChange}
+          onBlur={onBlur}
+          className={className}
+          placeholder={placeholder as string}
+          defaultValue={formatDate({ type, inputDate: defaultValue as string })}
+          ref={componentRef as RefObject<HTMLInputElement>}
+          {...otherProps}
+        />
+      )
+    }
+    if (outputType === "makElements") {
+      return (
+        <mak.input
+          type={type}
+          value={formatDate({
+            type,
+            inputDate: localValue as string,
+          })}
+          onChange={handleLocalChange}
+          onBlur={onBlur}
+          className={className}
+          placeholder={placeholder as string}
+          defaultValue={formatDate({ type, inputDate: defaultValue as string })}
+          ref={componentRef as RefObject<HTMLInputElement>}
+          {...otherProps}
+        />
+      )
+    }
   }
 
   if (outputType === "htmlElements") {
