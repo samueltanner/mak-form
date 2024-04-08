@@ -178,4 +178,15 @@ const constructDynamicComponents = (formAccessor) => {
         return Object.assign(Object.assign({}, acc), { [componentName]: component });
     }, {});
 };
-export { constructDynamicComponents };
+const constructDynamicComponent = (formAccessor, name) => {
+    var _a;
+    const { form, outputType } = formAccessor;
+    const componentName = getComponentName(name, (_a = form[name]) === null || _a === void 0 ? void 0 : _a.componentName);
+    const component = componentFactory({
+        name,
+        formAccessor,
+        outputType,
+    });
+    return component;
+};
+export { constructDynamicComponents, constructDynamicComponent };

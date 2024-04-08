@@ -101,8 +101,12 @@ const DynamicComponentStruct = (props) => {
         }
     }
     if (type === "select" && outputType === "htmlElements") {
-        return (<select onChange={handleLocalChange} onBlur={onBlur} className={className} value={localValue} defaultValue={defaultValue ||
-                ""} ref={componentRef} {...otherProps}>
+        return (<select onChange={handleLocalChange} onBlur={onBlur} className={className} value={localValue} 
+        // defaultValue={
+        //   (defaultValue as SelectHTMLAttributes<HTMLSelectElement>["value"]) ||
+        //   ""
+        // }
+        ref={componentRef} {...otherProps}>
         {placeholder && (<option value="" disabled>
             {placeholder}
           </option>)}
@@ -115,8 +119,12 @@ const DynamicComponentStruct = (props) => {
     }
     if (["select", "multi-select"].includes(type) &&
         outputType === "makElements") {
-        return (<mak.select onChange={handleLocalChange} onBlur={onBlur} className={className} makClassName={makClassName} value={localValue} defaultValue={defaultValue ||
-                ""} multiple={multiple} ref={componentRef} {...otherProps}>
+        return (<mak.select onChange={handleLocalChange} onBlur={onBlur} className={className} makClassName={makClassName} value={localValue} 
+        // defaultValue={
+        //   (defaultValue as SelectHTMLAttributes<HTMLSelectElement>["value"]) ||
+        //   ""
+        // }
+        multiple={multiple} ref={componentRef} {...otherProps}>
         {placeholder && (<option value="" disabled>
             {placeholder}
           </option>)}
@@ -134,11 +142,13 @@ const DynamicComponentStruct = (props) => {
         return (<mak.input type={type} checked={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} makClassName={makClassName} ref={componentRef} {...otherProps}/>);
     }
     if (["date", "datetime", "datetime-local", "time", "week", "month"].includes(type)) {
-        const formatDate = ({ type, inputDate = dayjs(), }) => {
-            let date = dayjs(inputDate);
+        const formatDate = ({ type, inputDate, }) => {
             if (!inputDate || inputDate === "") {
-                date = dayjs();
+                console.log("no input");
+                // date = dayjs()
+                return undefined;
             }
+            let date = dayjs(inputDate);
             switch (type) {
                 case "date":
                     return date.format("YYYY-MM-DD");
@@ -158,20 +168,28 @@ const DynamicComponentStruct = (props) => {
             return (<input type={type} value={formatDate({
                     type,
                     inputDate: localValue,
-                })} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} defaultValue={formatDate({ type, inputDate: defaultValue })} ref={componentRef} {...otherProps}/>);
+                })} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} 
+            // defaultValue={formatDate({ type, inputDate: defaultValue as string })}
+            ref={componentRef} {...otherProps}/>);
         }
         if (outputType === "makElements") {
             return (<mak.input type={type} value={formatDate({
                     type,
                     inputDate: localValue,
-                })} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} defaultValue={formatDate({ type, inputDate: defaultValue })} ref={componentRef} {...otherProps}/>);
+                })} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} 
+            // defaultValue={formatDate({ type, inputDate: defaultValue as string })}
+            ref={componentRef} {...otherProps}/>);
         }
     }
     if (outputType === "htmlElements") {
-        return (<input type={type} value={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} defaultValue={defaultValue} ref={componentRef} {...otherProps}/>);
+        return (<input type={type} value={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} placeholder={placeholder} 
+        // defaultValue={defaultValue as string}
+        ref={componentRef} {...otherProps}/>);
     }
     if (outputType === "makElements") {
-        return (<mak.input type={type} value={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} makClassName={makClassName} defaultValue={defaultValue} placeholder={placeholder} ref={componentRef} {...otherProps}/>);
+        return (<mak.input type={type} value={localValue} onChange={handleLocalChange} onBlur={onBlur} className={className} makClassName={makClassName} 
+        // defaultValue={defaultValue as string}
+        placeholder={placeholder} ref={componentRef} {...otherProps}/>);
     }
 };
 const DynamicComponent = memo(DynamicComponentStruct);

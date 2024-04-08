@@ -1,4 +1,5 @@
 import componentFactory, {
+  constructDynamicComponent,
   constructDynamicComponents,
   getComponentName,
   getInitialComponentNames,
@@ -130,7 +131,7 @@ export const useMakForm = ({
     }
   }
 
-  const handleChangePublic = (name: string, value: any) => {
+  const handlePublicChange = (name: string, value: any) => {
     const elementType = formRef.current[name]?.type
     const event = {
       target: { name: name, value, type: elementType },
@@ -200,11 +201,11 @@ export const useMakForm = ({
     const constructedForm = constructForm(formAccessor)
 
     if (originalFormRef.current) {
-      const dynamicComponents = constructDynamicComponents({
+      const generatedDynamicComponents = constructDynamicComponents({
         ...formAccessor,
         form: originalFormRef.current,
       } as FormAccessor)
-      setDynamicComponents(dynamicComponents)
+      setDynamicComponents(generatedDynamicComponents)
       setForm(constructedForm)
     } else {
       formRef.current = constructedForm
@@ -213,14 +214,15 @@ export const useMakForm = ({
       beforeValidationErrorsRef.current = errors
       originalFormRef.current = constructedForm as MakForm
       setForm(originalFormRef.current)
-      const dynamicComponents = constructDynamicComponents(formAccessor)
-      setDynamicComponents(dynamicComponents)
+      const generatedDynamicComponents =
+        constructDynamicComponents(formAccessor)
+      setDynamicComponents(generatedDynamicComponents)
     }
     setIsDirty(false)
   }
 
   function getFormValues() {
-    if (!formRef.current) return
+    if (!formRef.current) return undefined
     const formValues = Object.entries(formRef.current).reduce(
       (acc, [key, value]) => {
         if (value?.type !== "submit" && value?.type !== "reset") {
@@ -235,24 +237,19 @@ export const useMakForm = ({
       {}
     )
 
-    return formValues
+    return formValues as { [key: string]: string }
   }
 
   useEffect(() => {
     constructFormAndComponents()
   }, [formConfig])
 
-  const valuesRef = useRef<any>(undefined)
-  useEffect(() => {
-    if (!valuesRef.current) {
-      valuesRef.current = getFormValues()
-    }
-    if (!deepEqual(valuesRef.current, getFormValues())) {
-      console.log("formValues", getFormValues())
-      valuesRef.current = getFormValues()
-      constructFormAndComponents()
-    }
-  })
+  const valuesRef = useRef<
+    | {
+        [key: string]: string
+      }
+    | undefined
+  >(undefined)
 
   return {
     form: form,
@@ -264,7 +261,7 @@ export const useMakForm = ({
       dirty: isDirty,
       clean: isClean,
     },
-    handleChange: handleChangePublic,
+    handleChange: handlePublicChange,
     reset: handleReset,
     submit: handleSubmit,
   } as {

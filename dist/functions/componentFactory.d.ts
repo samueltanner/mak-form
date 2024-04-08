@@ -11,4 +11,5 @@ interface ComponentFactoryProps {
 declare const componentFactory: ({ formAccessor, name, }: ComponentFactoryProps) => MakFormDynamicComponent;
 export default componentFactory;
 declare const constructDynamicComponents: (formAccessor: FormAccessor) => {};
-export { constructDynamicComponents };
+declare const constructDynamicComponent: (formAccessor: FormAccessor, name: string) => MakFormDynamicComponent;
+export { constructDynamicComponents, constructDynamicComponent };

@@ -1,6 +1,6 @@
 import componentFactory, { constructDynamicComponents, getComponentName, getInitialComponentNames, } from "../functions/componentFactory";
 import constructForm from "../functions/constructForm";
-import { deepEqual, ensureSingleElementType } from "../functions/helpers";
+import { ensureSingleElementType } from "../functions/helpers";
 import { useEffect, useRef, useState } from "react";
 import { validateField, validateForm } from "../functions/validate";
 export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMakComponents, onSubmit, onReset, validateFormOn = "submit", revalidateFormOn = "none", resetOnSubmit = true, }) => {
@@ -68,7 +68,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             setErrors(errorsRef.current);
         }
     }
-    const handleChangePublic = (name, value) => {
+    const handlePublicChange = (name, value) => {
         var _a, _b;
         const elementType = (_a = formRef.current[name]) === null || _a === void 0 ? void 0 : _a.type;
         const event = {
@@ -125,8 +125,8 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             return;
         const constructedForm = constructForm(formAccessor);
         if (originalFormRef.current) {
-            const dynamicComponents = constructDynamicComponents(Object.assign(Object.assign({}, formAccessor), { form: originalFormRef.current }));
-            setDynamicComponents(dynamicComponents);
+            const generatedDynamicComponents = constructDynamicComponents(Object.assign(Object.assign({}, formAccessor), { form: originalFormRef.current }));
+            setDynamicComponents(generatedDynamicComponents);
             setForm(constructedForm);
         }
         else {
@@ -135,14 +135,14 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             beforeValidationErrorsRef.current = errors;
             originalFormRef.current = constructedForm;
             setForm(originalFormRef.current);
-            const dynamicComponents = constructDynamicComponents(formAccessor);
-            setDynamicComponents(dynamicComponents);
+            const generatedDynamicComponents = constructDynamicComponents(formAccessor);
+            setDynamicComponents(generatedDynamicComponents);
         }
         setIsDirty(false);
     };
     function getFormValues() {
         if (!formRef.current)
-            return;
+            return undefined;
         const formValues = Object.entries(formRef.current).reduce((acc, [key, value]) => {
             var _a;
             if ((value === null || value === void 0 ? void 0 : value.type) !== "submit" && (value === null || value === void 0 ? void 0 : value.type) !== "reset") {
@@ -161,16 +161,6 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
         constructFormAndComponents();
     }, [formConfig]);
     const valuesRef = useRef(undefined);
-    useEffect(() => {
-        if (!valuesRef.current) {
-            valuesRef.current = getFormValues();
-        }
-        if (!deepEqual(valuesRef.current, getFormValues())) {
-            console.log("formValues", getFormValues());
-            valuesRef.current = getFormValues();
-            constructFormAndComponents();
-        }
-    });
     return {
         form: form,
         components: dynamicComponents,
@@ -181,7 +171,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
             dirty: isDirty,
             clean: isClean,
         },
-        handleChange: handleChangePublic,
+        handleChange: handlePublicChange,
         reset: handleReset,
         submit: handleSubmit,
     };

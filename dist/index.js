@@ -88,28 +88,6 @@ const getValueObjectsArray = (value, options) => {
     }
   });
 };
-const deepEqual = (obj1, obj2) => {
-  if (obj1 === obj2) {
-    return true;
-  }
-  if (obj1 === null || typeof obj1 !== "object" || obj2 === null || typeof obj2 !== "object") {
-    return false;
-  }
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-  for (const key of keys1) {
-    if (!keys2.includes(key)) {
-      return false;
-    }
-    if (!deepEqual(obj1[key], obj2[key])) {
-      return false;
-    }
-  }
-  return true;
-};
 
 dayjs__default["default"].extend(isoWeek__default["default"]);
 const DynamicComponentStruct = props => {
@@ -275,8 +253,12 @@ const DynamicComponentStruct = props => {
       onChange: handleLocalChange,
       onBlur: onBlur,
       className: className,
-      value: localValue,
-      defaultValue: defaultValue || "",
+      value: localValue
+      // defaultValue={
+      //   (defaultValue as SelectHTMLAttributes<HTMLSelectElement>["value"]) ||
+      //   ""
+      // }
+      ,
       ref: componentRef
     }, otherProps), placeholder && /*#__PURE__*/React__default["default"].createElement("option", {
       value: "",
@@ -294,8 +276,12 @@ const DynamicComponentStruct = props => {
       onBlur: onBlur,
       className: className,
       makClassName: makClassName,
-      value: localValue,
-      defaultValue: defaultValue || "",
+      value: localValue
+      // defaultValue={
+      //   (defaultValue as SelectHTMLAttributes<HTMLSelectElement>["value"]) ||
+      //   ""
+      // }
+      ,
       multiple: multiple,
       ref: componentRef
     }, otherProps), placeholder && /*#__PURE__*/React__default["default"].createElement("option", {
@@ -332,12 +318,14 @@ const DynamicComponentStruct = props => {
   if (["date", "datetime", "datetime-local", "time", "week", "month"].includes(type)) {
     const formatDate = ({
       type,
-      inputDate = dayjs__default["default"]()
+      inputDate
     }) => {
-      let date = dayjs__default["default"](inputDate);
       if (!inputDate || inputDate === "") {
-        date = dayjs__default["default"]();
+        console.log("no input");
+        // date = dayjs()
+        return undefined;
       }
+      let date = dayjs__default["default"](inputDate);
       switch (type) {
         case "date":
           return date.format("YYYY-MM-DD");
@@ -363,11 +351,9 @@ const DynamicComponentStruct = props => {
         onChange: handleLocalChange,
         onBlur: onBlur,
         className: className,
-        placeholder: placeholder,
-        defaultValue: formatDate({
-          type,
-          inputDate: defaultValue
-        }),
+        placeholder: placeholder
+        // defaultValue={formatDate({ type, inputDate: defaultValue as string })}
+        ,
         ref: componentRef
       }, otherProps));
     }
@@ -381,11 +367,9 @@ const DynamicComponentStruct = props => {
         onChange: handleLocalChange,
         onBlur: onBlur,
         className: className,
-        placeholder: placeholder,
-        defaultValue: formatDate({
-          type,
-          inputDate: defaultValue
-        }),
+        placeholder: placeholder
+        // defaultValue={formatDate({ type, inputDate: defaultValue as string })}
+        ,
         ref: componentRef
       }, otherProps));
     }
@@ -397,8 +381,9 @@ const DynamicComponentStruct = props => {
       onChange: handleLocalChange,
       onBlur: onBlur,
       className: className,
-      placeholder: placeholder,
-      defaultValue: defaultValue,
+      placeholder: placeholder
+      // defaultValue={defaultValue as string}
+      ,
       ref: componentRef
     }, otherProps));
   }
@@ -409,8 +394,9 @@ const DynamicComponentStruct = props => {
       onChange: handleLocalChange,
       onBlur: onBlur,
       className: className,
-      makClassName: makClassName,
-      defaultValue: defaultValue,
+      makClassName: makClassName
+      // defaultValue={defaultValue as string}
+      ,
       placeholder: placeholder,
       ref: componentRef
     }, otherProps));
@@ -928,7 +914,7 @@ const useMakForm = ({
       setErrors(errorsRef.current);
     }
   }
-  const handleChangePublic = (name, value) => {
+  const handlePublicChange = (name, value) => {
     var _a, _b;
     const elementType = (_a = formRef.current[name]) === null || _a === void 0 ? void 0 : _a.type;
     const event = {
@@ -992,10 +978,10 @@ const useMakForm = ({
     if (!formConfig) return;
     const constructedForm = constructForm(formAccessor);
     if (originalFormRef.current) {
-      const dynamicComponents = constructDynamicComponents(Object.assign(Object.assign({}, formAccessor), {
+      const generatedDynamicComponents = constructDynamicComponents(Object.assign(Object.assign({}, formAccessor), {
         form: originalFormRef.current
       }));
-      setDynamicComponents(dynamicComponents);
+      setDynamicComponents(generatedDynamicComponents);
       setForm(constructedForm);
     } else {
       formRef.current = constructedForm;
@@ -1005,13 +991,13 @@ const useMakForm = ({
       beforeValidationErrorsRef.current = errors;
       originalFormRef.current = constructedForm;
       setForm(originalFormRef.current);
-      const dynamicComponents = constructDynamicComponents(formAccessor);
-      setDynamicComponents(dynamicComponents);
+      const generatedDynamicComponents = constructDynamicComponents(formAccessor);
+      setDynamicComponents(generatedDynamicComponents);
     }
     setIsDirty(false);
   };
   function getFormValues() {
-    if (!formRef.current) return;
+    if (!formRef.current) return undefined;
     const formValues = Object.entries(formRef.current).reduce((acc, [key, value]) => {
       var _a;
       if ((value === null || value === void 0 ? void 0 : value.type) !== "submit" && (value === null || value === void 0 ? void 0 : value.type) !== "reset") {
@@ -1027,17 +1013,7 @@ const useMakForm = ({
   React.useEffect(() => {
     constructFormAndComponents();
   }, [formConfig]);
-  const valuesRef = React.useRef(undefined);
-  React.useEffect(() => {
-    if (!valuesRef.current) {
-      valuesRef.current = getFormValues();
-    }
-    if (!deepEqual(valuesRef.current, getFormValues())) {
-      console.log("formValues", getFormValues());
-      valuesRef.current = getFormValues();
-      constructFormAndComponents();
-    }
-  });
+  React.useRef(undefined);
   return {
     form: form,
     components: dynamicComponents,
@@ -1048,7 +1024,7 @@ const useMakForm = ({
       dirty: isDirty,
       clean: isClean
     },
-    handleChange: handleChangePublic,
+    handleChange: handlePublicChange,
     reset: handleReset,
     submit: handleSubmit
   };

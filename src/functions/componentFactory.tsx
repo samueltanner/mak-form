@@ -245,4 +245,20 @@ const constructDynamicComponents = (formAccessor: FormAccessor) => {
   }, {})
 }
 
-export { constructDynamicComponents }
+const constructDynamicComponent = (
+  formAccessor: FormAccessor,
+  name: string
+) => {
+  const { form, outputType } = formAccessor
+  const componentName = getComponentName(name, form[name]?.componentName)
+
+  const component = componentFactory({
+    name,
+    formAccessor,
+    outputType,
+  })
+
+  return component
+}
+
+export { constructDynamicComponents, constructDynamicComponent }

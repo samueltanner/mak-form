@@ -208,10 +208,10 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
         onBlur={onBlur}
         className={className}
         value={localValue as SelectHTMLAttributes<HTMLSelectElement>["value"]}
-        defaultValue={
-          (defaultValue as SelectHTMLAttributes<HTMLSelectElement>["value"]) ||
-          ""
-        }
+        // defaultValue={
+        //   (defaultValue as SelectHTMLAttributes<HTMLSelectElement>["value"]) ||
+        //   ""
+        // }
         ref={componentRef as RefObject<HTMLSelectElement>}
         {...otherProps}
       >
@@ -245,10 +245,10 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
         className={className}
         makClassName={makClassName}
         value={localValue as SelectHTMLAttributes<HTMLSelectElement>["value"]}
-        defaultValue={
-          (defaultValue as SelectHTMLAttributes<HTMLSelectElement>["value"]) ||
-          ""
-        }
+        // defaultValue={
+        //   (defaultValue as SelectHTMLAttributes<HTMLSelectElement>["value"]) ||
+        //   ""
+        // }
         multiple={multiple}
         ref={componentRef as RefObject<HTMLSelectElement>}
         {...otherProps}
@@ -308,15 +308,17 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
   ) {
     const formatDate = ({
       type,
-      inputDate = dayjs(),
+      inputDate,
     }: {
       type: FieldType
       inputDate?: dayjs.Dayjs | string
     }) => {
-      let date = dayjs(inputDate)
       if (!inputDate || inputDate === "") {
-        date = dayjs()
+        console.log("no input")
+        // date = dayjs()
+        return undefined
       }
+      let date = dayjs(inputDate)
 
       switch (type) {
         case "date":
@@ -346,7 +348,7 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
           onBlur={onBlur}
           className={className}
           placeholder={placeholder as string}
-          defaultValue={formatDate({ type, inputDate: defaultValue as string })}
+          // defaultValue={formatDate({ type, inputDate: defaultValue as string })}
           ref={componentRef as RefObject<HTMLInputElement>}
           {...otherProps}
         />
@@ -364,7 +366,7 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
           onBlur={onBlur}
           className={className}
           placeholder={placeholder as string}
-          defaultValue={formatDate({ type, inputDate: defaultValue as string })}
+          // defaultValue={formatDate({ type, inputDate: defaultValue as string })}
           ref={componentRef as RefObject<HTMLInputElement>}
           {...otherProps}
         />
@@ -381,7 +383,7 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
         onBlur={onBlur}
         className={className}
         placeholder={placeholder as string}
-        defaultValue={defaultValue as string}
+        // defaultValue={defaultValue as string}
         ref={componentRef as RefObject<HTMLInputElement>}
         {...otherProps}
       />
@@ -397,7 +399,7 @@ const DynamicComponentStruct = (props: DynamicComponentProps) => {
         onBlur={onBlur}
         className={className}
         makClassName={makClassName}
-        defaultValue={defaultValue as string}
+        // defaultValue={defaultValue as string}
         placeholder={placeholder as string}
         ref={componentRef as RefObject<HTMLInputElement>}
         {...otherProps}
