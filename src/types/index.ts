@@ -291,6 +291,7 @@ export interface MakFormProps {
   validateFormOn?: MakFormValidationOption
   revalidateFormOn?: MakFormValidationOption
   resetOnSubmit?: boolean
+  children?: React.ReactNode
 }
 
 export interface FormAccessor {

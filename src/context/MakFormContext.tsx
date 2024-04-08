@@ -1,26 +1,48 @@
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
+import {
+  MakForm as MakFormType,
+  MakFormDynamicComponents,
+  MakFormErrors,
+  MakFormProps,
+  useMakForm,
+  InputChangeEvent,
+  MakFormValidationOption,
+  FormAccessor,
+  MakFormElement,
+} from ".."
 import componentFactory, {
-  constructDynamicComponent,
   constructDynamicComponents,
   getComponentName,
   getInitialComponentNames,
-} from "../functions/componentFactory"
-import constructForm from "../functions/constructForm"
-import { deepEqual, ensureSingleElementType } from "../functions/helpers"
-import React, { useEffect, useRef, useState } from "react"
-import {
-  FormAccessor,
-  InputChangeEvent,
-  MakForm,
-  MakFormDynamicComponents,
-  MakFormElement,
-  MakFormErrors,
-  MakFormFieldConfig,
-  MakFormProps,
-  MakFormValidationOption,
-} from "../types/index"
-import { validateField, validateForm } from "../functions/validate"
+} from "@/functions/componentFactory"
+import { validateField, validateForm } from "@/functions/validate"
+import { ensureSingleElementType } from "@/functions/helpers"
+import constructForm from "@/functions/constructForm"
 
-export const useMakForm = ({
+interface MakFormContextType {
+  form: MakFormType
+  components: MakFormDynamicComponents
+  errors: MakFormErrors
+  formState: {
+    errors: MakFormErrors
+    values: any
+    dirty: boolean
+    clean: boolean
+  }
+  handleChange: (target: string, value: any) => void
+  reset: () => void
+  submit: () => void
+}
+
+const MakFormContext = createContext<MakFormContextType | undefined>(undefined)
+
+export const MakFormProvider = ({
   formConfig,
   useMakElements,
   useHTMLElements,
@@ -30,6 +52,7 @@ export const useMakForm = ({
   validateFormOn = "submit",
   revalidateFormOn = "none",
   resetOnSubmit = true,
+  children,
 }: MakFormProps) => {
   const outputType = ensureSingleElementType({
     useMakElements,
@@ -37,8 +60,8 @@ export const useMakForm = ({
     useMakComponents,
   })
 
-  const formRef = useRef<MakForm>(formConfig || {})
-  const originalFormRef = useRef<MakForm>()
+  const formRef = useRef<MakFormType>(formConfig || {})
+  const originalFormRef = useRef<MakFormType>()
   const errorsRef = useRef<MakFormErrors>({})
   const beforeValidationErrorsRef = useRef<MakFormErrors>(
     Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
@@ -49,7 +72,7 @@ export const useMakForm = ({
     }, {})
   )
 
-  const [form, setForm] = useState<MakForm>({})
+  const [form, setForm] = useState<MakFormType>({})
   const [errors, setErrors] = useState<MakFormErrors>({})
 
   const [dynamicComponents, setDynamicComponents] =
@@ -62,7 +85,7 @@ export const useMakForm = ({
   }, [isDirty])
 
   const formAccessor: FormAccessor = {
-    form: formRef.current as MakForm,
+    form: formRef.current as MakFormType,
     handleChange,
     outputType,
     onSubmit: handleSubmit,
@@ -86,7 +109,7 @@ export const useMakForm = ({
     const value = target.value || target.checked
     const fieldName = target.name
 
-    const prev = formRef.current as MakForm
+    const prev = formRef.current as MakFormType
     const prevField = prev[fieldName]
     const updatedValue = {
       ...prevField,
@@ -99,7 +122,7 @@ export const useMakForm = ({
       [fieldName]: {
         ...updatedValue,
       },
-    } as MakForm
+    } as MakFormType
 
     const validation = validateField({
       form: updatedForm,
@@ -109,8 +132,8 @@ export const useMakForm = ({
 
     updatedForm[fieldName]!.errors = validation
 
-    formRef.current = updatedForm as MakForm
-    setForm(updatedForm as MakForm)
+    formRef.current = updatedForm as MakFormType
+    setForm(updatedForm as MakFormType)
 
     const continuousValidationErrors = {
       ...beforeValidationErrorsRef.current,
@@ -190,8 +213,8 @@ export const useMakForm = ({
     if (onReset) {
       onReset()
     } else {
-      setForm(originalFormRef.current as MakForm)
-      formRef.current = originalFormRef.current as MakForm
+      setForm(originalFormRef.current as MakFormType)
+      formRef.current = originalFormRef.current as MakFormType
       constructFormAndComponents()
     }
   }
@@ -212,7 +235,7 @@ export const useMakForm = ({
 
       const errors = validateForm({ form: constructedForm })
       beforeValidationErrorsRef.current = errors
-      originalFormRef.current = constructedForm as MakForm
+      originalFormRef.current = constructedForm as MakFormType
       setForm(originalFormRef.current)
       const generatedDynamicComponents =
         constructDynamicComponents(formAccessor)
@@ -244,7 +267,7 @@ export const useMakForm = ({
     constructFormAndComponents()
   }, [formConfig])
 
-  return {
+  const value = {
     form: form,
     components: dynamicComponents,
     errors: errors,
@@ -259,7 +282,7 @@ export const useMakForm = ({
     submit: handleSubmit,
   } as {
     components: MakFormDynamicComponents
-    form: MakForm
+    form: MakFormType
     formState: {
       errors: MakFormErrors
       values: any
@@ -271,6 +294,16 @@ export const useMakForm = ({
     reset: () => void
     submit: () => void
   }
+
+  return (
+    <MakFormContext.Provider value={value}>{children}</MakFormContext.Provider>
+  )
 }
 
-export default useMakForm
+export const useMakFormContext = () => {
+  const context = useContext(MakFormContext)
+  if (context === undefined) {
+    throw new Error("MakForm must be used within a FormProvider")
+  }
+  return context
+}

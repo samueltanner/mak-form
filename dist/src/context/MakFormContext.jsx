@@ -1,9 +1,10 @@
-import componentFactory, { constructDynamicComponents, getComponentName, getInitialComponentNames, } from "../functions/componentFactory";
-import constructForm from "../functions/constructForm";
-import { ensureSingleElementType } from "../functions/helpers";
-import { useEffect, useRef, useState } from "react";
-import { validateField, validateForm } from "../functions/validate";
-export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMakComponents, onSubmit, onReset, validateFormOn = "submit", revalidateFormOn = "none", resetOnSubmit = true, }) => {
+import React, { createContext, useContext, useEffect, useRef, useState, } from "react";
+import componentFactory, { constructDynamicComponents, getComponentName, getInitialComponentNames, } from "@/functions/componentFactory";
+import { validateField, validateForm } from "@/functions/validate";
+import { ensureSingleElementType } from "@/functions/helpers";
+import constructForm from "@/functions/constructForm";
+const MakFormContext = createContext(undefined);
+export const MakFormProvider = ({ formConfig, useMakElements, useHTMLElements, useMakComponents, onSubmit, onReset, validateFormOn = "submit", revalidateFormOn = "none", resetOnSubmit = true, children, }) => {
     const outputType = ensureSingleElementType({
         useMakElements,
         useHTMLElements,
@@ -160,7 +161,7 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
     useEffect(() => {
         constructFormAndComponents();
     }, [formConfig]);
-    return {
+    const value = {
         form: form,
         components: dynamicComponents,
         errors: errors,
@@ -174,5 +175,12 @@ export const useMakForm = ({ formConfig, useMakElements, useHTMLElements, useMak
         reset: handleReset,
         submit: handleSubmit,
     };
+    return (<MakFormContext.Provider value={value}>{children}</MakFormContext.Provider>);
 };
-export default useMakForm;
+export const useMakFormContext = () => {
+    const context = useContext(MakFormContext);
+    if (context === undefined) {
+        throw new Error("MakForm must be used within a FormProvider");
+    }
+    return context;
+};

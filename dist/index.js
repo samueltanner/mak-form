@@ -753,7 +753,7 @@ const validateField = ({
   config === null || config === void 0 ? void 0 : config.max1;
   const errors = {};
   if (required && !value && value !== 0 && value !== false) {
-    const errorString = `${label} is required.`;
+    const errorString = `${label} is required. value is: ${value}`;
     // setFormErrors((prev) => ({
     //   ...prev,
     //   [fieldName]: errorString,
@@ -1013,7 +1013,6 @@ const useMakForm = ({
   React.useEffect(() => {
     constructFormAndComponents();
   }, [formConfig]);
-  React.useRef(undefined);
   return {
     form: form,
     components: dynamicComponents,
@@ -1030,5 +1029,214 @@ const useMakForm = ({
   };
 };
 
+const MakFormContext = /*#__PURE__*/React.createContext(undefined);
+const MakFormProvider = ({
+  formConfig,
+  useMakElements,
+  useHTMLElements,
+  useMakComponents,
+  onSubmit,
+  onReset,
+  validateFormOn = "submit",
+  revalidateFormOn = "none",
+  resetOnSubmit = true,
+  children
+}) => {
+  const outputType = ensureSingleElementType({
+    useMakElements,
+    useHTMLElements,
+    useMakComponents
+  });
+  const formRef = React.useRef(formConfig || {});
+  const originalFormRef = React.useRef();
+  const errorsRef = React.useRef({});
+  const beforeValidationErrorsRef = React.useRef(Object.entries(formConfig || {}).reduce((acc, [key, value]) => {
+    if (!["button", "submit", "reset"].includes(value === null || value === void 0 ? void 0 : value.type)) {
+      acc[key] = undefined;
+    }
+    return acc;
+  }, {}));
+  const [form, setForm] = React.useState({});
+  const [errors, setErrors] = React.useState({});
+  const [dynamicComponents, setDynamicComponents] = React.useState(getInitialComponentNames({
+    formConfig
+  }));
+  const [isDirty, setIsDirty] = React.useState(false);
+  const [isClean, setIsClean] = React.useState(true);
+  React.useEffect(() => {
+    setIsClean(!isDirty);
+  }, [isDirty]);
+  const formAccessor = {
+    form: formRef.current,
+    handleChange,
+    outputType,
+    onSubmit: handleSubmit,
+    onReset: handleReset,
+    validateFormOn,
+    revalidateFormOn,
+    formRef
+  };
+  function handleChange({
+    event,
+    validateOn,
+    revalidateOn
+  }) {
+    var _a;
+    setIsDirty(true);
+    const target = event.target;
+    const value = target.value || target.checked;
+    const fieldName = target.name;
+    const prev = formRef.current;
+    const prevField = prev[fieldName];
+    const updatedValue = Object.assign({}, prevField);
+    updatedValue["value"] = value;
+    updatedValue["errors"] = undefined;
+    const updatedForm = Object.assign(Object.assign({}, prev), {
+      [fieldName]: Object.assign({}, updatedValue)
+    });
+    const validation = (_a = validateField({
+      form: updatedForm,
+      fieldName,
+      value
+    })) === null || _a === void 0 ? void 0 : _a[fieldName];
+    updatedForm[fieldName].errors = validation;
+    formRef.current = updatedForm;
+    setForm(updatedForm);
+    const continuousValidationErrors = Object.assign(Object.assign({}, beforeValidationErrorsRef.current), {
+      [fieldName]: validation
+    });
+    beforeValidationErrorsRef.current = continuousValidationErrors;
+    if (validateOn === "change" || validateFormOn === "change" || revalidateFormOn === "change" || revalidateOn === "change") {
+      errorsRef.current = beforeValidationErrorsRef.current;
+      setErrors(errorsRef.current);
+    }
+  }
+  const handlePublicChange = (name, value) => {
+    var _a, _b;
+    const elementType = (_a = formRef.current[name]) === null || _a === void 0 ? void 0 : _a.type;
+    const event = {
+      target: {
+        name: name,
+        value,
+        type: elementType
+      }
+    };
+    handleChange({
+      event,
+      validateOn: "change",
+      revalidateOn: "change"
+    });
+    const componentName = getComponentName(name, (_b = formConfig === null || formConfig === void 0 ? void 0 : formConfig[name]) === null || _b === void 0 ? void 0 : _b.componentName);
+    const proxyAccessor = Object.assign(Object.assign({}, formAccessor), {
+      form: formRef.current
+    });
+    const dynamicComponent = componentFactory({
+      formAccessor: proxyAccessor,
+      name
+    });
+    const updatedDynamicComponents = Object.assign(Object.assign({}, dynamicComponents), {
+      [componentName]: dynamicComponent
+    });
+    setDynamicComponents(updatedDynamicComponents);
+  };
+  function handleSubmit() {
+    const validation = validateForm({
+      form: form || {}
+    });
+    if (Object.values(validation).some(error => error)) {
+      errorsRef.current = validation;
+      setErrors(errorsRef.current);
+      const errorsOnly = Object.entries(validation).reduce((acc, [key, value]) => {
+        if (value) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+      console.warn("Form has errors:", errorsOnly);
+      return;
+    }
+    if (onSubmit) {
+      onSubmit(getFormValues());
+    }
+    if (resetOnSubmit) {
+      constructFormAndComponents();
+    }
+  }
+  function handleReset() {
+    if (onReset) {
+      onReset();
+    } else {
+      setForm(originalFormRef.current);
+      formRef.current = originalFormRef.current;
+      constructFormAndComponents();
+    }
+  }
+  const constructFormAndComponents = () => {
+    if (!formConfig) return;
+    const constructedForm = constructForm(formAccessor);
+    if (originalFormRef.current) {
+      const generatedDynamicComponents = constructDynamicComponents(Object.assign(Object.assign({}, formAccessor), {
+        form: originalFormRef.current
+      }));
+      setDynamicComponents(generatedDynamicComponents);
+      setForm(constructedForm);
+    } else {
+      formRef.current = constructedForm;
+      const errors = validateForm({
+        form: constructedForm
+      });
+      beforeValidationErrorsRef.current = errors;
+      originalFormRef.current = constructedForm;
+      setForm(originalFormRef.current);
+      const generatedDynamicComponents = constructDynamicComponents(formAccessor);
+      setDynamicComponents(generatedDynamicComponents);
+    }
+    setIsDirty(false);
+  };
+  function getFormValues() {
+    if (!formRef.current) return undefined;
+    const formValues = Object.entries(formRef.current).reduce((acc, [key, value]) => {
+      var _a;
+      if ((value === null || value === void 0 ? void 0 : value.type) !== "submit" && (value === null || value === void 0 ? void 0 : value.type) !== "reset") {
+        acc[key] = value === null || value === void 0 ? void 0 : value.value;
+      }
+      if (((_a = formConfig === null || formConfig === void 0 ? void 0 : formConfig[key]) === null || _a === void 0 ? void 0 : _a.type) === "number") {
+        acc[key] = Number(value === null || value === void 0 ? void 0 : value.value) || 0;
+      }
+      return acc;
+    }, {});
+    return formValues;
+  }
+  React.useEffect(() => {
+    constructFormAndComponents();
+  }, [formConfig]);
+  const value = {
+    form: form,
+    components: dynamicComponents,
+    errors: errors,
+    formState: {
+      errors: beforeValidationErrorsRef.current,
+      values: getFormValues(),
+      dirty: isDirty,
+      clean: isClean
+    },
+    handleChange: handlePublicChange,
+    reset: handleReset,
+    submit: handleSubmit
+  };
+  return /*#__PURE__*/React__default["default"].createElement(MakFormContext.Provider, {
+    value: value
+  }, children);
+};
+const useMakFormContext = () => {
+  const context = React.useContext(MakFormContext);
+  if (context === undefined) {
+    throw new Error("MakForm must be used within a FormProvider");
+  }
+  return context;
+};
+
+exports.MakFormProvider = MakFormProvider;
 exports.useMakForm = useMakForm;
+exports.useMakFormContext = useMakFormContext;
 //# sourceMappingURL=index.js.map
